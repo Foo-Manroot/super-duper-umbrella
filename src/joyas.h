@@ -12,7 +12,7 @@
  */
 #define MSG_AYUDA "\n\
 Práctica de Ampliación de Programación Avanzada.\n\
-	Daniel Estangui y Miguel García\n\
+	Daniel Estangüi y Miguel García\n\
 Uso correcto:\n\
 joyas [-hman:f:c:v]\n\
 	-h\n\
