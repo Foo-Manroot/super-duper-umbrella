@@ -1,5 +1,4 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include "candy.h"
 
 #define FIL 5
 #define COL 5
