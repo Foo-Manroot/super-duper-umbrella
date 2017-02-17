@@ -1,5 +1,5 @@
-#ifndef _JOYAS_H_
-#define _JOYAS_H_
+#ifndef _LIBPARSER_H_
+#define _LIBPARSER_H_
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -31,44 +31,12 @@ joyas [-hman:f:c:v]\n\
 		Incrementa el nivel de detalle\n\
 "
 
-/**
- * Nivel máximo en el juego
- */
-#define MAX_NV 3
 
-/* --------------------------- */
-/* DEFINICIONES DE ESTRUCTURAS */
-/* --------------------------- */
-
-/**
- * Estructura para las dimensiones de la matriz
- */
-typedef struct {
-
-	int filas;
-	int columnas;
-} dim_t;
-
-
-/* ----------------------- */
-/* DEFINICIONES DE ERRORES */
-/* ----------------------- */
-
-/**
- * La función acabó sin problemas.
- */
-#define SUCCESS 0
-
-/**
- * Éxito al procesar un argumento que requiere que se termine la ejecución (por ejemplo,
- * la opción '-h'.
- */
-#define SUCC_ARGS 1
-
-/**
- * Error al pasar los argumentos.
- */
-#define ERR_ARGS -1
+/* ------------------------ */
+/* DECLARACIÓN DE FUNCIONES */
+/* ------------------------ */
+int procesar_args (int argc, char *argv []);
+void imprimir_info ();
 
 
 #endif

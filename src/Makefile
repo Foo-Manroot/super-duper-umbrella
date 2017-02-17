@@ -2,32 +2,54 @@ GCC=gcc
 NVCC=nvcc
 CFLAGS=-Wall
 OBJFLAGS=-Wall -c
+LIB=ar rcs
+
+
+####
+# Ayuda para el Makefile:
+# 	-> $@ significa "el objetivo"
+# 	-> $^ significa "los requisitos"
+# 	-> $< significa "sólo el primer requisito"
+####
 
 .PHONY: clean all
 
-all: cpu
+all: candy
 
-cuda: joyas.cu
-	$(NVCC) joyas.cu -o joyas-CUDA
+####
+#cuda: joyas.cu
+#	$(NVCC) joyas.cu -o joyas-CUDA
+#----
 
-cpu: joyas.o
-	$(GCC) $(CFLAGS) joyas.o -o joyas
+####
+candy: candy.o libparser.a
+	$(GCC) $(CFLAGS) $^ -o $@
 
-joyas.o: joyas.c joyas.h
-	$(GCC) $(OBJFLAGS) joyas.c -o joyas.o
+candy.o: candy.c candy.h common.h
+	$(GCC) $(OBJFLAGS) $< -o $@
+#----
+
+####
+# Biblioteca para el intérprete de comandos
+libparser.a: parser.o
+	$(LIB) $@ $^
+
+parser.o: parser.c libparser.h common.h
+	$(GCC) $(OBJFLAGS) $< -o $@
+#----
 
 #### --------------------------------------------------- ####
 # Compila con las opciones necesarias para perfilar con gprof
 gprof: gprof.o
-	$(GCC) $(CFLAGS) prof.o -o prof -pg
+	$(GCC) $(CFLAGS) $^ -o $@ -pg
 
 gprof.o: joyas.c joyas.h
-	$(GCC) $(OBJFLAGS) mult_matrices.c -o prof.o -pg
+	$(GCC) $(OBJFLAGS) $< -o $@ -pg
 #### --------------------------------------------------- ####
 
 clean:
-	rm -f *.o
-	rm -f joyas
+	rm -f *.o *.a
+	rm -f candy
 	rm -f joyas-CUDA
-	rm -f prof
+	rm -f gprof
 	rm -f gmon.out profile.txt

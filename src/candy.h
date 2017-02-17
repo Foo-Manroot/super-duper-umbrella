@@ -1,15 +1,19 @@
-#ifndef _JOYAS_H_
-#define _JOYAS_H_
+#ifndef _CANDY_H_
+#define _CANDY_H_
 
+#include "common.h"
+#include "libparser.h"
+
+/*
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <unistd.h>
-
+*/
 /**
  * Mensaje de ayuda para mostrar el funcionamiento del programa.
- */
+ *//*
 #define MSG_AYUDA "\n\
 Práctica de Ampliación de Programación Avanzada.\n\
 	Daniel Estangüi y Miguel García\n\
@@ -30,7 +34,7 @@ joyas [-hman:f:c:v]\n\
 	-v\n\
 		Incrementa el nivel de detalle\n\
 "
-
+*/
 /**
  * Nivel máximo en el juego
  */
@@ -43,12 +47,12 @@ joyas [-hman:f:c:v]\n\
 /**
  * Estructura para las dimensiones de la matriz
  */
-typedef struct {
+/*typedef struct {
 
 	int filas;
 	int columnas;
 } dim_t;
-
+*/
 
 /* ----------------------- */
 /* DEFINICIONES DE ERRORES */
@@ -57,18 +61,18 @@ typedef struct {
 /**
  * La función acabó sin problemas.
  */
-#define SUCCESS 0
+//#define SUCCESS 0
 
 /**
  * Éxito al procesar un argumento que requiere que se termine la ejecución (por ejemplo,
  * la opción '-h'.
  */
-#define SUCC_ARGS 1
+//#define SUCC_ARGS 1
 
 /**
  * Error al pasar los argumentos.
  */
-#define ERR_ARGS -1
+//#define ERR_ARGS -1
 
 
 #endif

@@ -1,4 +1,6 @@
-#include "joyas.h"
+#include "common.h"
+#include "libparser.h"
+
 
 /* ------------------ */
 /* VARIABLES GLOBALES */
@@ -29,43 +31,6 @@ dim_t tam_matriz = {
  */
 bool modo_auto = true;
 
-
-
-/* -------------------------- */
-/* DECLARACIONES DE FUNCIONES */
-/* -------------------------- */
-
-int procesar_args (int argc, char *argv []);
-void imprimir_info ();
-
-
-
-/* ---------------- */
-/* IMPLEMENTACIONES */
-/* ---------------- */
-
-/**
- * Función principal.
- *
- * @return
- * 		-> SUCCESS si todo ha acabado correctamente.
- */
-int main (int argc, char *argv [])
-{
-	int ret = procesar_args (argc, argv);
-
-	if (ret == 0)
-	{
-		/* Imprime los valores de las variables usadas para el juego */
-		imprimir_info ();
-		return SUCCESS;
-	}
-
-	/* Imprime los valores de las variables usadas para el juego */
-	imprimir_info ();
-
-	return SUCCESS;
-}
 
 /**
  * Procesa los argumentos pasados por línea de comandos
