@@ -22,7 +22,7 @@ all: candy
 #----
 
 ####
-candy: candy.o libparser.a
+candy: candy.o libutils.a
 	$(GCC) $(CFLAGS) $^ -o $@
 
 candy.o: candy.c candy.h common.h
@@ -31,20 +31,20 @@ candy.o: candy.c candy.h common.h
 
 ####
 # Biblioteca para el intérprete de comandos
-libparser.a: parser.o
+libutils.a: utils.o
 	$(LIB) $@ $^
 
-parser.o: parser.c libparser.h common.h
+utils.o: utils.c libutils.h common.h
 	$(GCC) $(OBJFLAGS) $< -o $@
 #----
 
 #### --------------------------------------------------- ####
 # Compila con las opciones necesarias para perfilar con gprof
-gprof: gprof.o
-	$(GCC) $(CFLAGS) $^ -o $@ -pg
-
-gprof.o: joyas.c joyas.h
-	$(GCC) $(OBJFLAGS) $< -o $@ -pg
+#gprof: gprof.o
+#	$(GCC) $(CFLAGS) $^ -o $@ -pg
+#
+#gprof.o: joyas.c joyas.h
+#	$(GCC) $(OBJFLAGS) $< -o $@ -pg
 #### --------------------------------------------------- ####
 
 clean:
