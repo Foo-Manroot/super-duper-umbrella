@@ -1,14 +1,15 @@
-#include "candy.h"
+#include<stdio.h>
+#include<stdlib.h>
 
 #define FIL 5
 #define COL 5
 
 /* Estructura Diamante */
 typedef struct {
-	
-	//id = {1,2,3,4,5,6,7,8} indican el tipo de diamante
-	//id = {0} indica que no hay fiamante en ese hueco
-	int id;
+    
+    //id = {1,2,3,4,5,6,7,8} indican el tipo de diamante
+    //id = {0} indica que no hay fiamante en ese hueco
+    int id;
    
   } Diamante;
 
@@ -62,7 +63,7 @@ void rellenar_malla(Diamante malla[FIL][COL]){
 	}	
 }
 
-int es_valido_mov(int posY, int posX, int mov, Diamante malla[FIL][COL]){
+int es_valido(int posY, int posX, int mov, Diamante malla[FIL][COL]){
 	/*Si devuelve 0 no hay error*/
 	int b = 1;
 	switch(mov){
@@ -89,7 +90,7 @@ int es_valido_mov(int posY, int posX, int mov, Diamante malla[FIL][COL]){
 void mover_diamante(int posY, int posX, int mov, Diamante malla[FIL][COL]){
 	Diamante aux;
 
-	if (es_valido_mov(posY,posX,mov,malla) == 0){
+	if (es_valido(posY,posX,mov,malla) == 0){
 
 		switch(mov){
 		case 0:
@@ -128,51 +129,168 @@ int son_iguales(Diamante d1,Diamante d2){
 	return b;
 }
 
-void buscar_coincidencias(Diamante malla[FIL][COL]){
+int buscar_coincidencias(int posY, int posX, int sen,Diamante malla[FIL][COL]){
+
+	int posY_sig;
+	int posX_sig;
+
+
+
+	if(es_valido(posY,posX,sen,malla) == 0){
+		//printf ("[%d][%d], %d \n",posY,posX,sen);
+		switch(sen){
+			case 0: posY_sig = posY + 1; posX_sig = posX; break;
+			case 1:	posY_sig = posY - 1; posX_sig = posX; break;
+			case 2: posY_sig = posY; posX_sig = posX - 1; break;
+			case 3: posY_sig = posY; posX_sig = posX + 1; break;
+		}
+
+		if(son_iguales(malla[posY][posX],malla[posY_sig][posX_sig]) == 0){
+			return (buscar_coincidencias(posY_sig,posX_sig,sen,malla) + 1); //Suma una coincidencia
+		}
+	}
+	return 0;
+}
+
+void eliminar_coincidencias(int posY,int posX,int sen,Diamante malla[FIL][COL]){
+
+	int posY_sig;
+	int posX_sig;
+
+	if(es_valido(posY,posX,sen,malla) == 0){
+
+		switch(sen){
+			case 0: posY_sig = posY + 1; posX_sig = posX; break;
+			case 1:	posY_sig = posY - 1; posX_sig = posX; break;
+			case 2: posY_sig = posY; posX_sig = posX - 1; break;
+			case 3: posY_sig = posY; posX_sig = posX + 1; break;
+		}
+		
+		if(son_iguales(malla[posY][posX],malla[posY_sig][posX_sig]) == 0){
+			eliminar_coincidencias(posY_sig,posX_sig,sen,malla);
+			malla[posY_sig][posX_sig] = cambiar_diamante(0);
+		}
+	}
+
+}
+
+void eliminar_coincidencias_eje(int posY, int posX,int eje,Diamante malla[FIL][COL]){
+	switch(eje){
+		case 0: //Eje vertical
+			eliminar_coincidencias(posY,posX,0,malla);
+			eliminar_coincidencias(posY,posX,1,malla);
+			malla[posY][posX] = cambiar_diamante(0);
+
+			break;
+		case 1://Eje horizontal
+
+			eliminar_coincidencias(posY,posX,2,malla);
+			eliminar_coincidencias(posY,posX,3,malla);
+			malla[posY][posX] = cambiar_diamante(0);
+
+			break;
+	}
+
+}
+
+void tratar_coincidencias(int posY, int posX, Diamante malla[FIL][COL]) {
+
+	/**
+	* int sen{sentido}
+	* Arriba = 1
+	* Abajo = 0
+	* Izquierda = 2
+	* Derecha = 3
+	*/
+
+	if(malla[posY][posX].id != 0){ //Si la posicion no es un hueco
+		/*Busqueda horizontal*/
+		if((buscar_coincidencias(posY,posX,2,malla) + buscar_coincidencias(posY,posX,3,malla) + 1) >= 3){
+			eliminar_coincidencias_eje(posY,posX,1,malla);//Eje horizontal 1
+		}
+		/*Busqueda vertical*/
+		if((buscar_coincidencias(posY,posX,0,malla) + buscar_coincidencias(posY,posX,1,malla) + 1) >= 3){
+			eliminar_coincidencias_eje(posY,posX,0,malla);//Eje vertical 0
+		}	
+	}
+}
+
+void recorrer_malla_coincidencias(Diamante malla[FIL][COL]){
 	for (int i = 0; i < FIL; ++i){
 	
 		for (int j = 0; j < COL; ++j)
 		{
-			Diamante d_cen = malla[i][j];
-			Diamante d_der = malla[i][j + 1];
-			Diamante d_izq = malla[i][j - 1];
-
-			if((son_iguales(d_cen,d_der) == 0)&&
-			(son_iguales(d_cen,d_izq) == 0)) {
-			/*Se eliminan los diamantes cercanos que sean iguales*/
-
-			malla[i][j] = cambiar_diamante(0);
-			malla[i][j + 1] = cambiar_diamante(0);
-			malla[i][j - 1] = cambiar_diamante(0);
-			}	
+			tratar_coincidencias(i,j,malla);	
 		}
 	}
 }
 
-/*void buscar_horizontal(int posY, int posX, Diamante malla[FIL][COL]){
-	//int b = 1;
-
-	Diamante d_cen = malla[posY][posX];
-	Diamante d_der = malla[posY][posX + 1];
-	Diamante d_izq = malla[posY][posX - 1];
-
-	if((son_iguales(d_cen,d_der) == 0)&&
-		(son_iguales(d_cen,d_izq) == 0)) {
-		//Se eliminan los diamantes cercanos que sean iguales
-
-		malla[posY][posX] = cambiar_diamante(0);
-		malla[posY][posX + 1] = cambiar_diamante(0);
-		malla[posY][posX - 0] = cambiar_diamante(0);
-
-
-
+void tratar_huecos(int posY, int posX, Diamante malla[FIL][COL]){
+	
+	if((posY < (FIL - 1))&&(malla[posY + 1][posX].id == 0)){
+		mover_diamante(posY,posX,0,malla);
+		if (posY == 0){
+			malla[posY][posX] = generar_diamante();
+		}else{
+			tratar_huecos(posY - 1,posX,malla);
+		}
+		
 	}
-	//return b;
-}*/
-int buscar_vertical(int posX, int posY, Diamante malla[FIL][COL]){
-	int b = 1;
 
-	return b;
+}
+
+void recorrer_malla_huecos(Diamante malla[FIL][COL]){
+	for (int i = 0; i < FIL; ++i){
+	
+		for (int j = 0; j < COL; ++j)
+		{
+			tratar_huecos(i,j,malla);	
+		}
+	}
+}
+void eliminar_fila(int fila,Diamante malla[FIL][COL]){
+	if (fila < FIL){
+		for (int i = 0; i < FIL; ++i)
+		{
+			malla[fila][i] = cambiar_diamante(0);
+		}
+	}
+	recorrer_malla_huecos(malla);
+
+}
+
+void reordenar_tablero(int posY,int posX,Diamante malla[FIL][COL]){
+	if((posX < (COL - 1))&&(malla[posY][posX + 1].id == 0)){
+		mover_diamante(posY,posX,3,malla);
+		if (posX == 0){
+			malla[posY][posX] = generar_diamante();
+		}else{
+			reordenar_tablero(posY,posX - 1,malla);
+		}
+		
+	}
+
+}
+
+
+void recorrer_malla_reorden(Diamante malla[FIL][COL]){
+	for (int i = 0; i < FIL; ++i){
+	
+		for (int j = 0; j < COL; ++j)
+		{
+			reordenar_tablero(i,j,malla);	
+		}
+	}
+}
+
+void eliminar_columna(int columna,Diamante malla[FIL][COL]){
+	if (columna < COL){
+		for (int i = 0; i < COL; ++i)
+		{
+			malla[i][columna] = cambiar_diamante(0);
+		}
+		recorrer_malla_reorden(malla);
+	}
 }
 
 int main(){
@@ -184,21 +302,45 @@ int main(){
 	
 	for (int i = 0; i < 10; ++i)
 	{
+
 		mostrar_malla(malla);
+		/*
 		int posY,posX,mov;		
 		printf("PosY: ");
-		scanf("%d", &(posY));
-		printf("PosX: ");
-		scanf("%d", &(posX));
-		printf("Mov{abajo = 0, arriba = 1, izquierda = 2, derecha = 3}: ");
-		scanf("%d", &(mov));
+        scanf("%d", &(posY));
+        printf("PosX: ");
+        scanf("%d", &(posX));
+        printf("Mov{abajo = 0, arriba = 1, izquierda = 2, derecha = 3}: ");
+        scanf("%d", &(mov));
+        */
+        int bomba;
+        printf("Bomba: ");
+        scanf("%d", &(bomba));
 
-		
-		
-		system("clear");
-		//Refresh
-		mover_diamante(posY,posX,mov,malla);
-		buscar_coincidencias(malla);
+        int fila = 0;
+        int columna = 0;
+
+        switch(bomba){
+        	case 1:
+        		
+        		printf("Fila: ");
+        		scanf("%d", &(fila));
+        		eliminar_fila(fila,malla);
+        		break;
+        	case 2: 
+        		
+        		printf("Columna: ");
+        		scanf("%d", &(columna));
+        		eliminar_columna(columna,malla);
+        		break;
+
+        }
+
+        system("clear");
+        //Refresh
+		//mover_diamante(posY,posX,mov,malla);
+		recorrer_malla_coincidencias(malla);
+		recorrer_malla_huecos(malla);
 
 
 	}
