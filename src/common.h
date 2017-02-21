@@ -22,6 +22,17 @@ typedef struct {
 	int columnas;
 } dim_t;
 
+/**
+ * Estructura Diamante
+ */
+typedef struct {
+    
+    //id = {1,2,3,4,5,6,7,8} indican el tipo de diamante
+    //id = {0} indica que no hay fiamante en ese hueco
+    int id;
+   
+} Diamante;
+
 
 
 /* ------------------------- */
@@ -51,7 +62,7 @@ typedef struct {
 #define SUCC_ARGS 1
 
 /**
- * Error al pasar los argumentos.
+ * Error al pasar los argumentos a la función.
  */
 #define ERR_ARGS -1
 

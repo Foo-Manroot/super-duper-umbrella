@@ -1,17 +1,7 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include "candy.h"
 
 #define FIL 5
 #define COL 5
-
-/* Estructura Diamante */
-typedef struct {
-    
-    //id = {1,2,3,4,5,6,7,8} indican el tipo de diamante
-    //id = {0} indica que no hay fiamante en ese hueco
-    int id;
-   
-  } Diamante;
 
 void mostrar_malla(Diamante malla[FIL][COL]){
 	for (int i = 0; i < FIL; ++i)
