@@ -38,6 +38,6 @@ joyas [-hman:f:c:v]\n\
 int procesar_args (int argc, char *argv []);
 void imprimir_info ();
 Malla ver_malla ();
-
+int guardar (Malla malla, const char *nombre_fichero);
 
 #endif

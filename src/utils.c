@@ -168,6 +168,10 @@ Malla ver_malla ()
 int guardar (Malla malla, const char *nombre_fichero)
 {
 	FILE *fichero = fopen (nombre_fichero, "w+");
+	int i,
+	    j,
+	    filas = malla.dimens.filas,
+	    columnas = malla.dimens.columnas;
 
 	if (fichero == NULL)
 	{
@@ -188,9 +192,18 @@ int guardar (Malla malla, const char *nombre_fichero)
 		 "\t%i\n"
 		 "\t%i\n",
 		 malla.nivel,
-		 malla.dimens.filas,
-		 malla.dimens.columnas);
+		 filas,
+		 columnas);
 
+	/* Recorre a matriz guardando su contenido por filas */
+	for (i = 0; i < filas; i++)
+	{
+		for (j = 0; j < columnas; j++)
+		{
+			fprintf (fichero, "%5i ", malla.matriz [(i * columnas) + j].id);
+		}
+		fprintf (fichero, "\n");
+	}
 
 	if (fclose (fichero) != 0)
 	{
