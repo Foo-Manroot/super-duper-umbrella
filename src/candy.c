@@ -1,7 +1,7 @@
 #include "candy.h"
 
-#define FIL ver_malla ().dimens.filas
-#define COL ver_malla ().dimens.columnas
+#define FIL ver_params ().dimens.filas
+#define COL ver_params ().dimens.columnas
 
 void mostrar_malla(Diamante malla[FIL][COL]){
 	for (int i = 0; i < FIL; ++i)
@@ -303,10 +303,25 @@ int main (int argc, char *argv[])
 		return SUCCESS;
 	}
 
+
+/* ---- */
+Malla test = {
+
+	.dimens = ver_params ().dimens,
+	.nivel = ver_params ().nivel
+};
+
+reservar_mem (&test);
+rellenar (&test);
+
+imprimir_malla (test);
+return 0;
+/* ---- */
+
 	iniciar_malla(malla);
 	rellenar_malla(malla);
 	
-        system("clear");
+//        system("clear");
 	for (int i = 0; i < 10; ++i)
 	{
 
@@ -353,4 +368,132 @@ int main (int argc, char *argv[])
 	}
 
 	return SUCCESS;
+}
+
+
+/* ---------------- */
+/* IMPLEMENTACIONES */
+/* ---------------- */
+
+/**
+ * Reserva la memoria necesaria para el tablero de juego
+ *
+ * @param malla
+ * 		Estructura de tipo Malla (definida en 'common.h') con las dimensiones de
+ * 	la matriz y su contenido.
+ *
+ *
+ * @return
+ * 		SUCCESS si todo ha salido correctamente
+ * 		ERR_MEM si hubo algún error al intentar reservar la memoria.
+ */
+int reservar_mem (Malla *malla)
+{
+	int filas = malla->dimens.filas,
+	    columnas = malla->dimens.columnas,
+	    i,
+	    j;
+
+	malla->matriz = malloc (filas * columnas * sizeof malla->matriz);
+
+	if (malla->matriz == NULL)
+	{
+		printf ("Error al intentar reservar la memoria para la matriz\n");
+		return ERR_MEM;
+	}
+
+	/* Inicializa la matriz para poner todas las casillas vacías */
+	for (i = 0; i < filas; i++)
+	{
+		for (j = 0; j< columnas; j++)
+		{
+			malla->matriz [(i * columnas) + j].id = DIAMANTE_VACIO;
+		}
+	}
+
+	return SUCCESS;
+}
+
+/**
+ * Rellena la matriz de juego con diamantes aleatorios.
+ *
+ * @param malla
+ * 		Estructura de tipo Malla (definida en 'common.h') con las dimensiones de
+ * 	la matriz y su contenido.
+ *
+ *
+ * @return
+ * 		SUCCESS si todo ha salido correctamente
+ */
+int rellenar (Malla *malla)
+{
+	int filas = malla->dimens.filas,
+	    columnas = malla->dimens.columnas,
+	    i,
+	    j;
+	Diamante diamante;
+	int max = DIAMANTE_VACIO;
+
+	switch (malla->nivel)
+	{
+		case 1:
+			max = 4;
+			break;
+
+		case 2:
+			max = 6;
+			break;
+
+		case 3:
+			max = DIAMANTE_MAX;
+			break;
+
+		default:
+			max = DIAMANTE_MAX;
+	}
+
+	/* Comprueba que la matriz tiene memoria reservada */
+	if (malla->matriz == NULL)
+	{
+		printf ("Error al intentar reservar la memoria para la matriz\n");
+		return ERR_MEM;
+	}
+
+	srand (time (NULL));
+	/* Asigna valores aleatorios al diamante */
+	for (i = 0; i < filas; i++)
+	{
+		for (j = 0; j< columnas; j++)
+		{
+			diamante.id = (rand () % max) + 1;
+			malla->matriz [(i * columnas) + j] = diamante;
+		}
+	}
+
+	return SUCCESS;
+}
+
+
+/**
+ * Imprime por pantalla el contenido de la matriz.
+ *
+ * @param malla
+ * 		Estructura de tipo Malla (definida en 'common.h') con las dimensiones de
+ * 	la matriz y su contenido.
+ */
+void imprimir_malla (Malla malla)
+{
+	int i,
+	    j,
+	    filas = malla.dimens.filas,
+	    columnas = malla.dimens.columnas;
+
+	for (i = 0; i < filas; i++)
+	{
+		for (j = 0; j < columnas; j++)
+		{
+			printf ("%5i ", malla.matriz [(i * columnas) + filas].id);
+		}
+		printf ("\n");
+	}
 }

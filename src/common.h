@@ -54,6 +54,16 @@ typedef struct {
  */
 #define MAX_NV 3
 
+/**
+ * Valor para representar un hueco en el tablero (diamante vacío)
+ */
+#define DIAMANTE_VACIO 0
+
+/**
+ * Mayor valor admitido para un diamante
+ */
+#define DIAMANTE_MAX 8
+
 
 
 /* ----------------------- */
@@ -81,6 +91,11 @@ typedef struct {
  * Error al abrir un archivo.
  */
 #define ERR_ARCHIVO -2
+
+/**
+ * Error al gestionar la memoria (reservar, liberar...)
+ */
+#define ERR_MEM -3
 
 
 #endif

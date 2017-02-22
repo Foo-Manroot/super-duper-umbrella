@@ -132,13 +132,13 @@ void imprimir_info ()
 
 /**
  * Devuelve una estructura Malla con los valores especificados (nivel y dimensiones),
- * pero sin reservar memoria para la matriz.
+ * pero sin ninguna memoria reservada para la matriz.
  *
  * @return
  * 		Una nueva instancia de tipo Malla, con los valores especificados por
  * 	línea de comandos.
  */
-Malla ver_malla ()
+Malla ver_params ()
 {
 	Malla malla = {
 
