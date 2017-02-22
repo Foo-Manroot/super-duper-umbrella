@@ -20,7 +20,7 @@ typedef struct {
 
 	int filas;
 	int columnas;
-} dim_t;
+} Dim;
 
 /**
  * Estructura Diamante
@@ -32,6 +32,16 @@ typedef struct {
     int id;
    
 } Diamante;
+
+/**
+ * Estructura para la matriz de juego
+ */
+typedef struct {
+
+	int nivel;		/* Nivel actual */
+	Dim dimens;		/* Dimensiones de la matriz */
+	Diamante *matriz;	/* Matriz de juego */
+} Malla;
 
 
 
@@ -66,6 +76,11 @@ typedef struct {
  */
 #define ERR_ARGS -1
 
+
+/**
+ * Error al abrir un archivo.
+ */
+#define ERR_ARCHIVO -2
 
 
 #endif

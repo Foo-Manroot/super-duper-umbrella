@@ -1,7 +1,7 @@
 #include "candy.h"
 
-#define FIL 5
-#define COL 5
+#define FIL ver_malla ().dimens.filas
+#define COL ver_malla ().dimens.columnas
 
 void mostrar_malla(Diamante malla[FIL][COL]){
 	for (int i = 0; i < FIL; ++i)
@@ -283,13 +283,30 @@ void eliminar_columna(int columna,Diamante malla[FIL][COL]){
 	}
 }
 
-int main(){
+/**
+ * Función principal
+ */
+int main (int argc, char *argv[])
+{
 
 	Diamante  malla[FIL][COL];
+
+	/**
+	 * Procesa los argumentos por línea de comandos
+ 	 */
+	int ret = procesar_args (argc, argv);
+
+	if (ret == SUCC_ARGS)
+	{
+		/* Sale del juego (se ha especificado alguna opción que lo
+		 indica, como '-h') */
+		return SUCCESS;
+	}
 
 	iniciar_malla(malla);
 	rellenar_malla(malla);
 	
+        system("clear");
 	for (int i = 0; i < 10; ++i)
 	{
 
@@ -335,5 +352,5 @@ int main(){
 
 	}
 
-	return 0;
+	return SUCCESS;
 }

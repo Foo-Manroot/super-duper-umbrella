@@ -21,7 +21,7 @@ int nivel = 1;
  *
  * (por defecto, es de 4 x 5)
  */
-dim_t tam_matriz = {
+Dim tam_matriz = {
 		.filas = 4,
 		.columnas = 5
 	};
@@ -73,10 +73,10 @@ int procesar_args (int argc, char *argv [])
 			case 'n':
 				aux = atoi (optarg);
 				/* Si el nivel especificado es menor que o igual a 0,
-				(atoi devuelve 0 si se introduce algo que no es un entero)
-				se establece el nivel 1.
-					Si se indica un nivel mayor que el máximo permitido,
-				se establece el máximo nivel */
+				(atoi devuelve 0 si se introduce algo que no es un
+				entero) se establece el nivel 1.
+					Si se indica un nivel mayor que el máximo
+				permitido, se establece el máximo nivel */
 				nivel = (aux <= 0)?
 					1
 					: (aux > MAX_NV)? MAX_NV : aux;
@@ -127,4 +127,76 @@ void imprimir_info ()
 			nivel,
 			(modo_auto)? "automático" : "manual");
 	}
+}
+
+
+/**
+ * Devuelve una estructura Malla con los valores especificados (nivel y dimensiones),
+ * pero sin reservar memoria para la matriz.
+ *
+ * @return
+ * 		Una nueva instancia de tipo Malla, con los valores especificados por
+ * 	línea de comandos.
+ */
+Malla ver_malla ()
+{
+	Malla malla = {
+
+		.dimens = tam_matriz,
+		.nivel = nivel,
+		.matriz = 0
+	};
+
+	return malla;
+}
+
+
+/**
+ * Permite guardar la malla en el fichero especificado.
+ *
+ * @param malla
+ * 		Estructura con toda la información del juego actual (nivel, dimensiones
+ * 	de la matriz y el contenido de la matriz).
+ *
+ * @param nombre_fichero
+ * 		Nombre del fichero en el que se deben guardar los datos. Si ya existe se
+ * 	sobrescribirá; si no, se creará.
+ *
+ * @return
+ * 		SUCCESS si los datos se han guardado correctamente.
+ */
+int guardar (Malla malla, const char *nombre_fichero)
+{
+	FILE *fichero = fopen (nombre_fichero, "w+");
+
+	if (fichero == NULL)
+	{
+		printf ("Error al abrir el archivo '%s'\n", nombre_fichero);
+		return ERR_ARCHIVO;
+	}
+
+	/* Vuelca el contenido en el archivo en el siguiente orden (el mismo en el que
+ 	están decñarados en 'common.h'):
+		Nivel
+		Dimensiones:
+			Filas
+			Columnas
+		Matriz
+	*/
+	fprintf (fichero,
+		 "%i\n"
+		 "\t%i\n"
+		 "\t%i\n",
+		 malla.nivel,
+		 malla.dimens.filas,
+		 malla.dimens.columnas);
+
+
+	if (fclose (fichero) != 0)
+	{
+		printf ("Error al cerrar el archivo '%s'\n", nombre_fichero);
+		return ERR_ARCHIVO;
+	}
+
+	return SUCCESS;
 }
