@@ -39,6 +39,9 @@ int procesar_args (int argc, char *argv []);
 void imprimir_info ();
 
 Malla ver_params ();
+
 int guardar (Malla malla, const char *nombre_fichero);
+int cargar (Malla *malla, const char *nombre_fichero);
+
 
 #endif
