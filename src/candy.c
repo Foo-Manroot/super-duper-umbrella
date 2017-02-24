@@ -187,6 +187,7 @@ void mover_diamante(int posY, int posX, int mov, Malla malla)
 			aux = matriz [((posY + 1) * cols) + posX];
 			matriz [((posY + 1) * cols) + posX] = matriz [(posY * cols) + posX];
 			matriz [(posY * cols) + posX] = aux;
+			break;
 		case 2:
 			/*Mover hacia izquierda*/
 			aux = matriz [(posY * cols) + posX - 1];
@@ -326,21 +327,23 @@ void tratar_huecos(int posY, int posX, Malla malla)
 {
 	int cols = malla.dimens.columnas;
 	Diamante *matriz = malla.matriz;
-	
-	if((posY < (malla.dimens.filas - 1))&&(matriz [((posY + 1) * cols) + posX].id == 0))
-	{ //Si no esta en la ultima fila y la de abajo es un hueco
-		mover_diamante(posY,posX,1,malla);
-		if (posY == 0)
-		{
-			matriz [(posY * cols) + posX] = generar_diamante();
-		}
-		else
-		{
-			tratar_huecos(posY - 1,posX,malla);
-		}
-		
-	}
 
+	if((posY == 0)&&(matriz [(posY * cols) + posX].id == 0)){
+
+		matriz [(posY * cols) + posX] = generar_diamante();
+
+
+		if(matriz [((posY + 1) * cols) + posX].id  == 0){
+			mover_diamante(posY,posX,1,malla);	
+			tratar_huecos(posY,posX,malla);
+		}
+	}
+	else if((matriz [(posY * cols) + posX].id == 0)&&(matriz [((posY - 1) * cols) + posX].id != 0)) {
+
+		mover_diamante(posY,posX,3,malla);
+		tratar_huecos(posY -1,posX,malla);
+
+	}
 }
 
 

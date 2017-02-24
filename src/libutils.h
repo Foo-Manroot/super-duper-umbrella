@@ -1,6 +1,8 @@
 #ifndef _LIBUTILS_H_
 #define _LIBUTILS_H_
 
+#include "common.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,7 +45,6 @@ Malla ver_params ();
 
 int guardar (Malla malla, const char *nombre_fichero);
 int cargar (Malla *malla, const char *nombre_fichero);
-
 
 int reservar_mem (Malla *malla);
 int rellenar (Malla *malla);
