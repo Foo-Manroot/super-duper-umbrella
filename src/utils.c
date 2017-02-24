@@ -294,7 +294,7 @@ int cargar (Malla *malla, const char *nombre_fichero)
 
 
 	return SUCCESS;
-
+}
 
 /**
  * Reserva la memoria necesaria para el tablero de juego
