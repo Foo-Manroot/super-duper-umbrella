@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <time.h>
 #include <unistd.h>
 
 /**
@@ -40,5 +41,10 @@ void imprimir_info ();
 
 Malla ver_params ();
 int guardar (Malla malla, const char *nombre_fichero);
+
+int reservar_mem (Malla *malla);
+int rellenar (Malla *malla);
+
+void mostrar_malla (Malla malla);
 
 #endif

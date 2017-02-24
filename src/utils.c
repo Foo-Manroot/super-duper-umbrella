@@ -213,3 +213,128 @@ int guardar (Malla malla, const char *nombre_fichero)
 
 	return SUCCESS;
 }
+
+/**
+ * Reserva la memoria necesaria para el tablero de juego
+ *
+ * @param malla
+ * 		Estructura de tipo Malla (definida en 'common.h') con las dimensiones de
+ * 	la matriz y su contenido.
+ *
+ *
+ * @return
+ * 		SUCCESS si todo ha salido correctamente
+ * 		ERR_MEM si hubo algún error al intentar reservar la memoria.
+ */
+int reservar_mem (Malla *malla)
+{
+	int filas = malla->dimens.filas,
+	    columnas = malla->dimens.columnas,
+	    i,
+	    j;
+
+	malla->matriz = malloc (filas * columnas * sizeof malla->matriz);
+
+	if (malla->matriz == NULL)
+	{
+		printf ("Error al intentar reservar la memoria para la matriz\n");
+		return ERR_MEM;
+	}
+
+	/* Inicializa la matriz para poner todas las casillas vacías */
+	for (i = 0; i < filas; i++)
+	{
+		for (j = 0; j< columnas; j++)
+		{
+			malla->matriz [(i * columnas) + j].id = DIAMANTE_VACIO;
+		}
+	}
+
+	return SUCCESS;
+}
+
+/**
+ * Rellena la matriz de juego con diamantes aleatorios.
+ *
+ * @param malla
+ * 		Estructura de tipo Malla (definida en 'common.h') con las dimensiones de
+ * 	la matriz y su contenido.
+ *
+ *
+ * @return
+ * 		SUCCESS si todo ha salido correctamente
+ */
+int rellenar (Malla *malla)
+{
+	int filas = malla->dimens.filas,
+	    columnas = malla->dimens.columnas,
+	    i,
+	    j;
+	Diamante diamante;
+	int max = DIAMANTE_VACIO;
+
+	switch (malla->nivel)
+	{
+		case 1:
+			max = 4;
+			break;
+
+		case 2:
+			max = 6;
+			break;
+
+		case 3:
+			max = DIAMANTE_MAX;
+			break;
+
+		default:
+			max = DIAMANTE_MAX;
+	}
+
+	/* Comprueba que la matriz tiene memoria reservada */
+	if (malla->matriz == NULL)
+	{
+		printf ("Error al intentar reservar la memoria para la matriz\n");
+		return ERR_MEM;
+	}
+
+	srand (time (NULL));
+	/* Asigna valores aleatorios al diamante */
+	for (i = 0; i < filas; i++)
+	{
+		for (j = 0; j < columnas; j++)
+		{
+			diamante.id = (rand () % max) + 1;
+printf ("Aleatorio: %i\n", diamante.id);
+			malla->matriz [(i * columnas) + j] = diamante;
+printf ("\tMatriz [%i]: %i\n", (i * columnas) + j, malla->matriz [(i * columnas) + j].id);
+		}
+	}
+
+	return SUCCESS;
+}
+
+
+/**
+ * Imprime por pantalla el contenido de la matriz.
+ *
+ * @param malla
+ * 		Estructura de tipo Malla (definida en 'common.h') con las dimensiones de
+ * 	la matriz y su contenido.
+ */
+void mostrar_malla (Malla malla)
+{
+	int i,
+	    j,
+	    filas = malla.dimens.filas,
+	    columnas = malla.dimens.columnas;
+
+	for (i = 0; i < filas; i++)
+	{
+		for (j = 0; j < columnas; j++)
+		{
+			printf ("%5i ", malla.matriz [(i * columnas) + j].id);
+		}
+		printf ("\n");
+	}
+}
