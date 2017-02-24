@@ -86,7 +86,6 @@ typedef struct {
  */
 #define ERR_ARGS -1
 
-
 /**
  * Error al abrir un archivo.
  */

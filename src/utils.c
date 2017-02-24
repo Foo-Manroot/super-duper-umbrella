@@ -134,6 +134,7 @@ void imprimir_info ()
  * Devuelve una estructura Malla con los valores especificados (nivel y dimensiones),
  * pero sin ninguna memoria reservada para la matriz.
  *
+ *
  * @return
  * 		Una nueva instancia de tipo Malla, con los valores especificados por
  * 	línea de comandos.
@@ -162,8 +163,10 @@ Malla ver_params ()
  * 		Nombre del fichero en el que se deben guardar los datos. Si ya existe se
  * 	sobrescribirá; si no, se creará.
  *
+ *
  * @return
  * 		SUCCESS si los datos se han guardado correctamente.
+ * 		ERR_ARCHIVO si no se pudo abrir o cerrar correctamente el archivo.
  */
 int guardar (Malla malla, const char *nombre_fichero)
 {
@@ -180,7 +183,7 @@ int guardar (Malla malla, const char *nombre_fichero)
 	}
 
 	/* Vuelca el contenido en el archivo en el siguiente orden (el mismo en el que
- 	están decñarados en 'common.h'):
+	están declarados en 'common.h'):
 		Nivel
 		Dimensiones:
 			Filas
@@ -188,9 +191,11 @@ int guardar (Malla malla, const char *nombre_fichero)
 		Matriz
 	*/
 	fprintf (fichero,
-		 "%i\n"
-		 "\t%i\n"
-		 "\t%i\n",
+		 "-> Nivel: %i\n"
+		 "-> Dimensiones:\n"
+		 "\t--> Filas: %i\n"
+		 "\t--> Columnas: %i\n"
+		 "Matriz:\n",
 		 malla.nivel,
 		 filas,
 		 columnas);
@@ -213,6 +218,83 @@ int guardar (Malla malla, const char *nombre_fichero)
 
 	return SUCCESS;
 }
+
+/**
+ * Carga desde el fichero especificado el juego guardado.
+ *
+ * @param malla
+ * 		Estructura en la que se va a cargar la información del juego.
+ *
+ * @param nombre_fichero
+ * 		Nombre del fichero que contiene la información del juego.
+ *
+ *
+ * @return
+ * 		SUCCESS si el archivo se cargó correctamente.
+ * 		ERR_ARCHIVO si hubo algún error al abrir o cerrar el fichero.
+ */
+int cargar (Malla *malla, const char *nombre_fichero)
+{
+	FILE *fichero = fopen (nombre_fichero, "r");
+	int i,
+	    j;
+
+	if (fichero == NULL)
+	{
+		printf ("Error al abrir el archivo.\n");
+		return ERR_ARCHIVO;
+	}
+
+	/* Obtiene el contenido del archivo en el siguiente orden (el mismo en el que
+	están declarados en 'common.h'):
+		Nivel
+		Dimensiones:
+			Filas
+			Columnas
+		Matriz
+	*/
+	fscanf (fichero,
+		 "-> Nivel: %i\n"
+		 "-> Dimensiones:\n"
+		 "\t--> Filas: %i\n"
+		 "\t--> Columnas: %i\n"
+		 "Matriz:\n",
+		 &malla->nivel,
+		 &malla->dimens.filas,
+		 &malla->dimens.columnas);
+
+	/* Reserva memoria para la matriz */
+	malla->matriz = malloc (malla->dimens.filas
+				* malla->dimens.columnas
+				* sizeof malla->matriz);
+	if (malla->matriz == NULL)
+	{
+		printf ("Error al reservar memoria para la matriz.\n");
+		return ERR_MEM;
+	}
+
+	/* Rellena la matriz con los valores del fichero */
+	for (i = 0; i < malla->dimens.filas; i++)
+	{
+		for (j = 0; j < malla->dimens.columnas; j++)
+		{
+			fscanf (fichero,
+				"%5i ",
+				&malla->matriz [(i * malla->dimens.columnas) + j].id);
+		}
+		fscanf (fichero, "\n");
+	}
+
+	/* Cierra el archivo */
+	if (fclose (fichero) != 0)
+	{
+		printf ("Error al cerrar el archivo '%s'\n", nombre_fichero);
+		return ERR_ARCHIVO;
+	}
+
+
+	return SUCCESS;
+
 
 /**
  * Reserva la memoria necesaria para el tablero de juego
@@ -305,9 +387,7 @@ int rellenar (Malla *malla)
 		for (j = 0; j < columnas; j++)
 		{
 			diamante.id = (rand () % max) + 1;
-printf ("Aleatorio: %i\n", diamante.id);
 			malla->matriz [(i * columnas) + j] = diamante;
-printf ("\tMatriz [%i]: %i\n", (i * columnas) + j, malla->matriz [(i * columnas) + j].id);
 		}
 	}
 
