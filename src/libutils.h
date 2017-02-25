@@ -2,6 +2,7 @@
 #define _LIBUTILS_H_
 
 #include "common.h"
+#include "menu.h"
 
 #include <stdarg.h>
 #include <stdbool.h>

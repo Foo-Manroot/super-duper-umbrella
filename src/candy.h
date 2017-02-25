@@ -32,7 +32,6 @@ int son_iguales(Diamante d1,Diamante d2);
 void mover_diamante(int posY, int posX, int mov, Malla malla);
 
 int es_valido(int posY, int posX, int mov, Malla malla);
-
 Diamante generar_diamante();
 
 #endif

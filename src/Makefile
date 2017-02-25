@@ -31,10 +31,13 @@ candy.o: candy.c candy.h common.h
 
 ####
 # Biblioteca para el intérprete de comandos
-libutils.a: utils.o
+libutils.a: utils.o menu.o
 	$(LIB) $@ $^
 
 utils.o: utils.c libutils.h common.h
+	$(GCC) $(OBJFLAGS) $< -o $@
+
+menu.o: menu.c menu.h common.h
 	$(GCC) $(OBJFLAGS) $< -o $@
 #----
 

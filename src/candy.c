@@ -18,6 +18,10 @@ int main (int argc, char *argv[])
 	reservar_mem (&malla);
 	rellenar (&malla);
 
+	menu (malla);
+
+	return SUCCESS;
+/*
 	for (int i = 0; i < 10; ++i)
 	{
 		mostrar_malla(malla);
@@ -29,7 +33,7 @@ int main (int argc, char *argv[])
         scanf("%d", &(posX));
         printf("Mov{abajo = 1, arriba = 3, izquierda = 2, derecha = 0}: ");
         scanf("%d", &(mov));
-        
+*/
 
         /*
         int bomba;
@@ -58,7 +62,7 @@ int main (int argc, char *argv[])
 
         }
 		*/
-        system("clear");
+/*        system("clear");
 
         //Refresh
 		mover_diamante(posY,posX,mov,malla);
@@ -78,6 +82,7 @@ int main (int argc, char *argv[])
 	}
 
 	return 0;
+*/
 }
 
 /* ---------------- */
