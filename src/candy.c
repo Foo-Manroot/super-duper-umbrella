@@ -117,19 +117,8 @@ Diamante generar_diamante()
 
 	/* Genera un id aleatorio */
 	srand (time (NULL));
-	d.id = (rand () % max) + 1;
+	d = crear_diamante ((rand () % max) + 1);
 
-	return d;
-}
-
-/*Cambia un diamante por otro*/
-Diamante cambiar_diamante(int num)
-{
-	/*Si se pasa por parametro num = 0, seria como eliminar un dimante*/
-	Diamante d;
-
-	d.id = num;
-	
 	return d;
 }
 
@@ -262,7 +251,7 @@ void eliminar_coincidencias(int posY,int posX,int sen,Malla malla)
 				matriz [(posY_sig * cols) + posX_sig]) == 1)
 		{
 			eliminar_coincidencias(posY_sig,posX_sig,sen,malla);
-			matriz [(posY_sig * cols) + posX_sig] = cambiar_diamante(0);
+			matriz [(posY_sig * cols) + posX_sig] = crear_diamante(0);
 		}
 	}
 
@@ -276,14 +265,14 @@ void eliminar_coincidencias_eje(int posY, int posX,int eje,Malla malla)
 		case 0: //Eje vertical
 			eliminar_coincidencias(posY,posX,1,malla);
 			eliminar_coincidencias(posY,posX,3,malla);
-			matriz [(posY * malla.dimens.columnas) + posX] = cambiar_diamante(0);
+			matriz [(posY * malla.dimens.columnas) + posX] = crear_diamante(0);
 
 			break;
 		case 1://Eje horizontal
 
 			eliminar_coincidencias(posY,posX,2,malla);
 			eliminar_coincidencias(posY,posX,0,malla);
-			matriz [(posY * malla.dimens.columnas) + posX] = cambiar_diamante(0);
+			matriz [(posY * malla.dimens.columnas) + posX] = crear_diamante(0);
 
 			break;
 	}
@@ -367,7 +356,7 @@ void eliminar_fila (int fila, Malla malla)
 	{
 		for (int i = 0; i < filas_malla; ++i)
 		{
-			matriz [(fila * malla.dimens.columnas) + i] = cambiar_diamante(0);
+			matriz [(fila * malla.dimens.columnas) + i] = crear_diamante(0);
 		}
 	}
 	recorrer_malla_huecos(malla);
@@ -419,7 +408,7 @@ void eliminar_columna(int columna,Malla malla)
 	{
 		for (int i = 0; i < cols; ++i)
 		{
-			matriz [(i * cols) + columna] = cambiar_diamante(0);
+			matriz [(i * cols) + columna] = crear_diamante(0);
 		}
 		recorrer_malla_reorden(malla);
 	}
@@ -433,56 +422,53 @@ int es_posible_giro (int posY, int posX, Malla malla)
 	    filas = malla.dimens.filas,
 	    cols = malla.dimens.columnas;
 
-	if((((posY - 1)== 0)||((posY - 1) % 3) == 0)&&((posY + 1)<(filas)))
+	/* Comprueba los límites del eje de giro */
+	if ( ((posY + 1) >= filas)
+		|| ((posX + 1) >= cols) )
+	{
+		return 0;
+	}
+
+	if(((posY - 1) == 0)
+		|| ((posY - 1) % 3) == 0)
 	{
 		/* Posición correcta para el eje Y */
-		if((((posX - 1)== 0)||((posX - 1)% 3) == 0)&&((posX + 1)<(cols)))
+		if(((posX - 1) == 0)
+			|| ((posX - 1) % 3) == 0)
 		{
 			/* Posición correcta para el eje X */
 			res = 1;
 		}
 
 	}
+
 	return res;
 }
 
 void girar_matriz(int ejeY, int ejeX, Malla malla)
 {
-
-	if (es_posible_giro(ejeY,ejeX,malla) == 1)
+	if (es_posible_giro (ejeY, ejeX, malla) == 1)
 	{
-		/* Rotacion 
-		 *
-		 * Se realizan 8 movimientos
-		 */
-		int posY = ejeY;
-		int posX = ejeX;
-		int sentido = 0;
 
-		for (int i = 0; i < 8; ++i)
-		{
-			if(((i + 1) % 3) == 0)
-			{
-				sentido++;
-			}
-			mover_diamante(posY,posX,sentido,malla);
+		int posY = ejeY - 1;
+		int posX = ejeX -1;
+		
+		Diamante aux;
 
-			switch(sentido)
-			{
-				case 0: posX++; break;
-				case 1: posY++; break;
-				case 2: posX--; break;
-				case 3: posY--; break;
-			}
-		}
-
+		aux = malla.matriz [(posY * malla.dimens.columnas) + posX];
+		mover_diamante(posY + 1,posX,3,malla);
+		mover_diamante(posY + 2,posX,3,malla);
+		mover_diamante(posY + 2,posX + 1,2,malla);
+		mover_diamante(posY + 2,posX + 2,2,malla);
+		mover_diamante(posY + 1,posX + 2,1,malla);
+		mover_diamante(posY,posX + 2,1,malla);
+		mover_diamante(posY,posX + 1,0,malla);
+		malla.matriz [(posY *  malla.dimens.columnas) + posX + 1] = aux;
 	}
-	printf("No es posible hacer giro: ejeY:%d ejeX: %d \n",ejeY,ejeX);
 }
 
 void recorrer_malla_giro (Malla malla)
 {
-
 	int i,
 	    j;
 

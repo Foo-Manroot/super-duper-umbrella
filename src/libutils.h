@@ -3,10 +3,11 @@
 
 #include "common.h"
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -34,6 +35,25 @@ joyas [-hman:f:c:v]\n\
 		Incrementa el nivel de detalle\n\
 "
 
+/**
+ * Colores
+ */
+#define NOR "\x1B[0m" //Color normal
+#define ROJ "\x1B[31m"
+#define VER "\x1B[32m"
+#define AMA "\x1B[33m"
+#define AZU "\x1B[34m"
+#define ROS "\x1B[35m"
+#define CYN "\x1B[36m"
+#define BLA "\x1B[37m"
+#define RST "\x1B[0m" //RESET
+
+/**
+ * Niveles de detalle
+ */
+#define DETALLE_LOG	0
+#define DETALLE_DEBUG	1
+#define DETALLE_EXTRA	2
 
 /* ------------------------ */
 /* DECLARACIÓN DE FUNCIONES */
@@ -42,13 +62,15 @@ int procesar_args (int argc, char *argv []);
 void imprimir_info ();
 
 Malla ver_params ();
-
 int guardar (Malla malla, const char *nombre_fichero);
+
 int cargar (Malla *malla, const char *nombre_fichero);
-
 int reservar_mem (Malla *malla);
-int rellenar (Malla *malla);
 
+int rellenar (Malla *malla);
 void mostrar_malla (Malla malla);
+
+Diamante crear_diamante (int num);
+void imprimir (int detalle, const char *cadena, ...);
 
 #endif

@@ -27,10 +27,10 @@ typedef struct {
  */
 typedef struct {
     
-    //id = {1,2,3,4,5,6,7,8} indican el tipo de diamante
-    //id = {0} indica que no hay fiamante en ese hueco
-    int id;
-   
+	//id = {1,2,3,4,5,6,7,8} indican el tipo de diamante
+	//id = {0} indica que no hay fiamante en ese hueco
+	int id;
+	const char *img;
 } Diamante;
 
 /**

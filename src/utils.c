@@ -59,7 +59,7 @@ int procesar_args (int argc, char *argv [])
 		switch (res)
 		{
 			case 'h':
-				printf ("%s\n", MSG_AYUDA);
+				imprimir (DETALLE_LOG, "%s\n", MSG_AYUDA);
 				return SUCC_ARGS;
 
 			case 'm':
@@ -110,23 +110,21 @@ int procesar_args (int argc, char *argv [])
  */
 void imprimir_info ()
 {
-	if (nivel_detalle >= 1)
-	{
-		printf ("------------------------------------------\n"
-			"Valor de las variables globales del juego:\n"
+	imprimir (DETALLE_DEBUG,
+		"------------------------------------------\n"
+		"Valor de las variables globales del juego:\n"
 			"\t--> Nivel de detalle: %i\n"
-			"\t--> Dimensiones del juego:\n"
+				"\t--> Dimensiones del juego:\n"
 				"\t\tFilas: %i\n"
 				"\t\tColumnas: %i\n"
 			"\t--> Nivel: %i\n"
 			"\t--> Modo: %s\n"
-			"------------------------------------------\n",
-			nivel_detalle,
-			tam_matriz.filas,
-			tam_matriz.columnas,
-			nivel,
-			(modo_auto)? "automático" : "manual");
-	}
+		"------------------------------------------\n",
+		nivel_detalle,
+		tam_matriz.filas,
+		tam_matriz.columnas,
+		nivel,
+		(modo_auto)? "automático" : "manual");
 }
 
 
@@ -178,7 +176,9 @@ int guardar (Malla malla, const char *nombre_fichero)
 
 	if (fichero == NULL)
 	{
-		printf ("Error al abrir el archivo '%s'\n", nombre_fichero);
+		imprimir (DETALLE_LOG,
+			 "Error al abrir el archivo '%s'\n",
+			  nombre_fichero);
 		return ERR_ARCHIVO;
 	}
 
@@ -212,7 +212,9 @@ int guardar (Malla malla, const char *nombre_fichero)
 
 	if (fclose (fichero) != 0)
 	{
-		printf ("Error al cerrar el archivo '%s'\n", nombre_fichero);
+		imprimir (DETALLE_LOG,
+			 "Error al cerrar el archivo '%s'\n",
+			  nombre_fichero);
 		return ERR_ARCHIVO;
 	}
 
@@ -264,12 +266,12 @@ int cargar (Malla *malla, const char *nombre_fichero)
 		 &malla->dimens.columnas);
 
 	/* Reserva memoria para la matriz */
-	malla->matriz = malloc (malla->dimens.filas
-				* malla->dimens.columnas
-				* sizeof malla->matriz);
+	malla->matriz = (Diamante *) malloc (malla->dimens.filas
+						* malla->dimens.columnas
+						* sizeof malla->matriz[0]);
 	if (malla->matriz == NULL)
 	{
-		printf ("Error al reservar memoria para la matriz.\n");
+		imprimir (DETALLE_LOG, "Error al reservar memoria para la matriz.\n");
 		return ERR_MEM;
 	}
 
@@ -288,7 +290,9 @@ int cargar (Malla *malla, const char *nombre_fichero)
 	/* Cierra el archivo */
 	if (fclose (fichero) != 0)
 	{
-		printf ("Error al cerrar el archivo '%s'\n", nombre_fichero);
+		imprimir (DETALLE_LOG,
+			 "Error al cerrar el archivo '%s'\n",
+			  nombre_fichero);
 		return ERR_ARCHIVO;
 	}
 
@@ -313,13 +317,15 @@ int reservar_mem (Malla *malla)
 	int filas = malla->dimens.filas,
 	    columnas = malla->dimens.columnas,
 	    i,
-	    j;
+	    j,
+	    aux;
 
-	malla->matriz = malloc (filas * columnas * sizeof malla->matriz);
+	malla->matriz = (Diamante *) malloc (filas * columnas * sizeof malla->matriz[0]);
 
 	if (malla->matriz == NULL)
 	{
-		printf ("Error al intentar reservar la memoria para la matriz\n");
+		imprimir (DETALLE_LOG,
+			  "Error al intentar reservar la memoria para la matriz\n");
 		return ERR_MEM;
 	}
 
@@ -328,7 +334,9 @@ int reservar_mem (Malla *malla)
 	{
 		for (j = 0; j< columnas; j++)
 		{
-			malla->matriz [(i * columnas) + j].id = DIAMANTE_VACIO;
+			//malla->matriz [(i * columnas) + j].id = DIAMANTE_VACIO;
+			aux = (i * columnas) + j;
+			malla->matriz [aux] = crear_diamante (DIAMANTE_VACIO);
 		}
 	}
 
@@ -376,7 +384,7 @@ int rellenar (Malla *malla)
 	/* Comprueba que la matriz tiene memoria reservada */
 	if (malla->matriz == NULL)
 	{
-		printf ("Error al intentar reservar la memoria para la matriz\n");
+		imprimir (DETALLE_DEBUG, "Error al intentar reservar la memoria para la matriz\n");
 		return ERR_MEM;
 	}
 
@@ -386,7 +394,7 @@ int rellenar (Malla *malla)
 	{
 		for (j = 0; j < columnas; j++)
 		{
-			diamante.id = (rand () % max) + 1;
+			diamante = crear_diamante ((rand () % max) + 1);
 			malla->matriz [(i * columnas) + j] = diamante;
 		}
 	}
@@ -413,8 +421,69 @@ void mostrar_malla (Malla malla)
 	{
 		for (j = 0; j < columnas; j++)
 		{
-			printf ("%5i ", malla.matriz [(i * columnas) + j].id);
+			imprimir (DETALLE_LOG,
+				  "%s ",
+				  malla.matriz [(i * columnas) + j].img);
 		}
-		printf ("\n");
+		imprimir (DETALLE_LOG, "\n");
 	}
+}
+
+/**
+ * Crea un diamante del tipo especificado.
+ *
+ * @param num
+ * 		Número del tipo de diamante a crear.
+ *
+ * @return
+ * 		Una nueva instancia de diamante.
+ */
+Diamante crear_diamante (int num)
+{
+	/* Si se pasa por parametro num = 0, seria como eliminar un dimante */
+	Diamante d;
+
+	d.id = num;
+
+	switch (num)
+	{
+		case 0: d.img = NOR "#" RST; break;
+		case 1: d.img = AZU "1" RST; break;
+		case 2: d.img = ROJ "2" RST; break;
+		case 3: d.img = CYN "3" RST; break;
+		case 4: d.img = VER "4" RST; break;
+		case 5: d.img = ROS "5" RST; break;
+		case 6: d.img = AMA "6" RST; break;
+		case 7: d.img = NOR "7" RST; break;
+		case 8: d.img = BLA "8" RST; break;
+	}
+
+	return d;
+}
+
+
+/**
+ * Imprime por pantalla la cadena pasada como argumento sólo si el nivel de detalle es
+ * el especificado (o mayor).
+ *
+ * @param detalle
+ * 		Nivel de detalle mínimo para imprimir el mensaje
+ *
+ * @param cadena
+ * 		Cadena con formato para imprimir
+ *
+ * @param ...
+ * 		Argumentos para el formato de la cadena
+ */
+void imprimir (int detalle, const char *cadena, ...)
+{
+	va_list args;
+	va_start (args, cadena);
+
+	if (nivel_detalle >= detalle)
+	{
+		vprintf (cadena, args);
+	}
+
+	va_end (args);
 }
