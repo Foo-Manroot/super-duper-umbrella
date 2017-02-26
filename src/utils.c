@@ -127,6 +127,20 @@ void imprimir_info ()
 		(modo_auto)? "automático" : "manual");
 }
 
+/**
+ * Cambia el valor de los parámetros del juego.
+ *
+ * @param nuevos_params
+ * 		Estructura de tipo Malla (definida en 'common.h') con los nuevos nivel
+ * 	y dimensiones del tablero de juego.
+ */
+void cambiar_params (Malla nuevos_params)
+{
+	nivel = nuevos_params.nivel;
+	tam_matriz.filas = nuevos_params.dimens.filas;
+	tam_matriz.columnas = nuevos_params.dimens.columnas;
+}
+
 
 /**
  * Devuelve una estructura Malla con los valores especificados (nivel y dimensiones),

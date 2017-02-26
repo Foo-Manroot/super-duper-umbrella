@@ -10,18 +10,20 @@
 void menu (Malla malla)
 {
 	int selecc = 0;
+	bool fin = false;
 
-	while (true)
+	while (!fin)
 	{
 		mostrar_malla (malla);
 		/* Imprime el menú y permite elegir opciones */
 		imprimir (DETALLE_LOG, MSG_MENU);
 
-		/* Pide la opción seleccionada (entre el 1 y el 5) */
-		selecc = pedir_opcion (1, 5);
+		/* Pide la opción seleccionada (entre el 0 y el 5) */
+		selecc = pedir_opcion (0, 5);
 
 		/*
 		Opciones disponibles:
+			0.- Salir
 			1.- Mover diamante
 			2.- Bomba
 			3.- Guardar partida
@@ -30,6 +32,9 @@ void menu (Malla malla)
 		*/
 		switch (selecc)
 		{
+			case 0:
+				fin = true;
+				break;
 			case 1:
 				break;
 			case 2:
@@ -41,6 +46,7 @@ void menu (Malla malla)
 				cargar_partida (&malla);
 				break;
 			case 5:
+				cambiar_nivel (&malla);
 				break;
 			default:
 				imprimir(DETALLE_LOG, "Opción no reconocida.\n");
@@ -58,6 +64,10 @@ void menu (Malla malla)
  *
  * @param max
  * 		Rango superior del grupo de números admitidos (inclusivo).
+ *
+ *
+ * @return
+ * 		El valor introducido por teclado.
  */
 int pedir_opcion (int min, int max)
 {
@@ -81,8 +91,10 @@ int pedir_opcion (int min, int max)
 		else if ((selecc < min)
 			|| (selecc > max))
 		{
+			ret_val = -1;
 			imprimir (DETALLE_LOG,
-				 "Sólo se admiten números entre %i y %i\n",
+				 "Sólo se admiten números entre %i y %i.\n"
+				 "Introduzca de nuevo un valor: ",
 				  min, max);
 		}
 
@@ -111,7 +123,7 @@ void guardar_partida (Malla malla)
 	/* Sustituye el salto de línea final */
 	fichero [strcspn (fichero, "\r\n")] = 0;
 
-
+	/* Guarda la partida */
 	if (guardar (malla, fichero) == SUCCESS)
 	{
 		imprimir (DETALLE_LOG,
@@ -129,7 +141,7 @@ void guardar_partida (Malla malla)
 /**
  * Muestra las opciones para cargar un fichero con una partida.
  *
- * @param actual
+ * @param antigua
  * 		Malla con la información de la partida actual. Si el fichero se carga
  * 	correctamente, se sustituye por ella. Si no, se deja como estaba.
  */
@@ -154,6 +166,8 @@ void cargar_partida (Malla *antigua)
 		antigua->matriz = nueva.matriz;
 		antigua->dimens = nueva.dimens;
 		antigua->nivel = nueva.nivel;
+
+		cambiar_params (nueva);
 	}
 	else
 	{
@@ -161,4 +175,27 @@ void cargar_partida (Malla *antigua)
 			  "Error al cargar la partida del archivo '%s'.\n",
 			  fichero);
 	}
+}
+
+
+/**
+ * Cambia el nivel del juego.
+ *
+ * @param malla
+ * 		Estructura (definida en 'common.h') en la que se almacena la información
+ * 	del juego y que va a ser cambiada.
+ */
+void cambiar_nivel (Malla *malla)
+{
+	int nuevo_nivel = malla->nivel;
+
+	/* Pide un número para cambiar el nivel */
+	imprimir (DETALLE_LOG, "Introduzca el nuevo nivel (entre 1 y %i): ", MAX_NV);
+	nuevo_nivel = pedir_opcion (1, MAX_NV);
+
+	imprimir (DETALLE_LOG, "Nuevo nivel: %i.\n", nuevo_nivel);
+
+	malla->nivel = nuevo_nivel;
+
+	cambiar_params (*malla);
 }

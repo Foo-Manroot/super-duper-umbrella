@@ -16,6 +16,7 @@
 #define MSG_MENU "\n\
 ---------------------\n\
 Opciones disponibles:\n\
+	0.- Salir\n\
 	1.- Mover diamante\n\
 	2.- Bomba\n\
 	3.- Guardar partida\n\
@@ -30,8 +31,9 @@ Introduzca la opción seleccionada: "
 void menu (Malla malla);
 int pedir_opcion (int min, int max);
 
-
 void guardar_partida (Malla malla);
 void cargar_partida (Malla *malla);
+
+void cambiar_nivel (Malla *malla);
 
 #endif

@@ -74,4 +74,6 @@ void mostrar_malla (Malla malla);
 Diamante crear_diamante (int num);
 void imprimir (int detalle, const char *cadena, ...);
 
+void cambiar_params (Malla malla);
+
 #endif
