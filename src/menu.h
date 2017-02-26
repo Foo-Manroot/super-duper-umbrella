@@ -30,6 +30,8 @@ Introduzca la opción seleccionada: "
 void menu (Malla malla);
 int pedir_opcion (int min, int max);
 
+
 void guardar_partida (Malla malla);
+void cargar_partida (Malla *malla);
 
 #endif

@@ -11,10 +11,9 @@ void menu (Malla malla)
 {
 	int selecc = 0;
 
-	mostrar_malla (malla);
-
 	while (true)
 	{
+		mostrar_malla (malla);
 		/* Imprime el menú y permite elegir opciones */
 		imprimir (DETALLE_LOG, MSG_MENU);
 
@@ -39,6 +38,7 @@ void menu (Malla malla)
 				guardar_partida (malla);
 				break;
 			case 4:
+				cargar_partida (&malla);
 				break;
 			case 5:
 				break;
@@ -122,6 +122,43 @@ void guardar_partida (Malla malla)
 	{
 		imprimir (DETALLE_LOG,
 			  "Error al guardar la partida en '%s'.\n",
+			  fichero);
+	}
+}
+
+/**
+ * Muestra las opciones para cargar un fichero con una partida.
+ *
+ * @param actual
+ * 		Malla con la información de la partida actual. Si el fichero se carga
+ * 	correctamente, se sustituye por ella. Si no, se deja como estaba.
+ */
+void cargar_partida (Malla *antigua)
+{
+	Malla nueva;
+	char fichero [100];
+
+	/* Pide el nombre del fichero */
+	imprimir (DETALLE_LOG, "Introduzca el nombre del archivo a cargar: ");
+
+	fgets (fichero, sizeof fichero, stdin);
+	/* Sustituye el salto de línea final */
+	fichero [strcspn (fichero, "\r\n")] = 0;
+
+	if (cargar (&nueva, fichero) == SUCCESS)
+	{
+		imprimir (DETALLE_LOG,
+			  "Partida cargada desde '%s' correctamente.\n",
+			  fichero);
+
+		antigua->matriz = nueva.matriz;
+		antigua->dimens = nueva.dimens;
+		antigua->nivel = nueva.nivel;
+	}
+	else
+	{
+		imprimir (DETALLE_LOG,
+			  "Error al cargar la partida del archivo '%s'.\n",
 			  fichero);
 	}
 }

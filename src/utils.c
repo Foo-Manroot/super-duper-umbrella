@@ -239,7 +239,9 @@ int cargar (Malla *malla, const char *nombre_fichero)
 {
 	FILE *fichero = fopen (nombre_fichero, "r");
 	int i,
-	    j;
+	    j,
+	    pos,
+	    aux;
 
 	if (fichero == NULL)
 	{
@@ -280,9 +282,10 @@ int cargar (Malla *malla, const char *nombre_fichero)
 	{
 		for (j = 0; j < malla->dimens.columnas; j++)
 		{
-			fscanf (fichero,
-				"%5i ",
-				&malla->matriz [(i * malla->dimens.columnas) + j].id);
+			pos = (i * malla->dimens.columnas) + j;
+			fscanf (fichero, "%5d ", &aux);
+
+			malla->matriz [pos] = crear_diamante (aux);
 		}
 		fscanf (fichero, "\n");
 	}
