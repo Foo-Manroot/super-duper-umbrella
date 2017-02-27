@@ -36,8 +36,10 @@ void menu (Malla malla)
 				fin = true;
 				break;
 			case 1:
+				mover (malla);
 				break;
 			case 2:
+				bomba (malla);
 				break;
 			case 3:
 				guardar_partida (malla);
@@ -53,6 +55,87 @@ void menu (Malla malla)
 		}
 	}
 }
+
+/**
+ * Pide los datos necesarios para realizar un movimiento.
+ *
+ * @param malla
+ * 		Estructura con la matriz en la que se van a mover los elementos.
+ */
+void mover (Malla malla)
+{
+	int posY = 0,
+	    posX = 0,
+	    mov = 0;
+
+	/* Pide los datos */
+	imprimir (DETALLE_LOG, "Posición del elemento a mover:\n");
+	/* Fila */
+	imprimir (DETALLE_LOG, "\tFila (entre 0 y %i): ", malla.dimens.filas);
+	posY = pedir_opcion (0, malla.dimens.filas);
+	/* Columna */
+	imprimir (DETALLE_LOG, "\tColumna (entre 0 y %i): ", malla.dimens.columnas);
+	posY = pedir_opcion (0, malla.dimens.columnas);
+	/* Movimiento */
+	imprimir (DETALLE_LOG, "Movimiento. Opciones disponibles:\n"
+				"\t0 -> derecha\n"
+				"\t1 -> abajo\n"
+				"\t2 -> izquierda\n"
+				"\t3 -> arriba\n"
+				"Introduzca el movimiento seleccionado: ");
+	mov = pedir_opcion (0, 3);
+
+	/* Realiza el movimiento */
+	mover_diamante(posY, posX, mov, malla);
+}
+
+
+/**
+ * Pide los datos necesarios para usar una bomba.
+ *
+ *  @param malla
+ * 		Estructura con la matriz en la que se van a mover los elementos.
+ */
+void bomba (Malla malla)
+{
+	int bomba = 1,
+	    fila = 0,
+	    columna = 0;
+
+	imprimir (DETALLE_LOG, "Bombas disponibles:\n"
+				"\t1 -> Eliminar fila\n"
+				"\t2 -> Eliminar columna\n"
+				"\t3 -> Girar en grupos de 3x3\n"
+				"Introduzca la bomba seleccionada: ");
+	bomba = pedir_opcion (1, 3);
+
+	switch (bomba)
+	{
+		case 1:
+			imprimir (DETALLE_LOG,
+				  "Fila (entre 0 y %i): ",
+				  malla.dimens.filas);
+
+			fila = pedir_opcion (0, malla.dimens.filas);
+			eliminar_fila (fila, malla);
+			break;
+
+		case 2: 
+			imprimir (DETALLE_LOG,
+				  "Columna (entre 0 y %i): ",
+				  malla.dimens.columnas);
+
+			fila = pedir_opcion (0, malla.dimens.columnas);
+
+			eliminar_columna(columna,malla);
+			break;
+
+		case 3: 
+			recorrer_malla_giro (malla);
+			break;
+	}
+}
+
 
 
 /**

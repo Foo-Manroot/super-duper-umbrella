@@ -35,5 +35,8 @@ void guardar_partida (Malla malla);
 void cargar_partida (Malla *malla);
 
 void cambiar_nivel (Malla *malla);
+void mover (Malla malla);
+
+void bomba (Malla malla);
 
 #endif

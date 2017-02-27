@@ -158,7 +158,25 @@ int es_valido(int posY, int posX, int mov, Malla malla)
 }
 
 
-
+/**
+ * Realiza un movimiento en la matriz.
+ *
+ * @param posY
+ * 		Fila del elemento a mover (entre 0 y n-1).
+ *
+ * @param PosX
+ * 		Columna del elemento a mover (entre 0 y n-1).
+ *
+ * @param mov
+ * 		Movimiento a realizar:
+ * 			0 -> derecha
+ * 			1 -> abajo
+ * 			2 -> izquierda
+ * 			3 -> arriba
+ *
+ * @param malla
+ * 		Estructura (definida en 'common.h') con los datos de la matriz de juego.
+ */
 void mover_diamante(int posY, int posX, int mov, Malla malla)
 {
 	Diamante aux;
@@ -195,7 +213,11 @@ void mover_diamante(int posY, int posX, int mov, Malla malla)
 			matriz [(posY * cols) + posX] = aux;
 			break;
 		}
-	}else printf("Error: movimiento no valido\n");
+	}
+	else
+	{
+		imprimir (DETALLE_LOG, "Error: movimiento no válido\n");
+	}
 }
 
 
