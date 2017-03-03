@@ -126,7 +126,13 @@ Diamante generar_diamante()
 
 	return d;
 }
-
+/*
+ * es_valido()
+ * Devuelve 1 si el movimineto puede realizarse
+ * 
+ * @param mov 
+ *		Indica el sentido en el que se raliza el movimietno
+ */
 int es_valido(int posY, int posX, int mov, Malla malla)
 {
 	/*Si devuelve 0 hay error*/
@@ -229,6 +235,26 @@ int son_iguales(Diamante d1,Diamante d2)
 	return b;
 }
 
+
+/**
+ * Devuelve el numero de conicidencias del elemnto en la matriz en un sentido
+ *
+ * @param posY
+ * 		Fila del elemento (entre 0 y n-1).
+ *
+ * @param PosX
+ * 		Columna del elemento (entre 0 y n-1).
+ *
+ * @param sen
+ * 		Sentido en el que se realiza la busqueda:
+ * 			0 -> derecha
+ * 			1 -> abajo
+ * 			2 -> izquierda
+ * 			3 -> arriba
+ *
+ * @param malla
+ * 		Estructura (definida en 'common.h') con los datos de la matriz de juego.
+ */
 int buscar_coincidencias(int posY, int posX, int sen,Malla malla)
 {
 	int posY_sig;
@@ -257,7 +283,25 @@ int buscar_coincidencias(int posY, int posX, int sen,Malla malla)
 }
 
 
-
+/**
+ * Elimina todos los elementos en una direccion que sean iguales al elemnto indicado
+ *
+ * @param posY
+ * 		Fila del elemento (entre 0 y n-1).
+ *
+ * @param PosX
+ * 		Columna del elemento (entre 0 y n-1).
+ *
+ * @param sen
+ * 		Sentido en el que se esta borrando:
+ * 			0 -> derecha
+ * 			1 -> abajo
+ * 			2 -> izquierda
+ * 			3 -> arriba
+ *
+ * @param malla
+ * 		Estructura (definida en 'common.h') con los datos de la matriz de juego.
+ */
 void eliminar_coincidencias(int posY,int posX,int sen,Malla malla)
 {
 	int posY_sig;
@@ -283,7 +327,24 @@ void eliminar_coincidencias(int posY,int posX,int sen,Malla malla)
 	}
 
 }
-
+/**
+ * Divide entre los dos ejes la eliminación de elemntos 
+ *
+ * @param posY
+ * 		Fila del elemento(entre 0 y n-1).
+ *
+ * @param PosX
+ * 		Columna del elemento(entre 0 y n-1).
+ *
+ * @param mov
+ * 		Eje sobre el que se va a eliminar:
+ * 			0 -> vertical
+ * 			1 -> horizontal
+ * 			
+ *
+ * @param malla
+ * 		Estructura (definida en 'common.h') con los datos de la matriz de juego.
+ */
 void eliminar_coincidencias_eje(int posY, int posX,int eje,Malla malla)
 {
 	Diamante *matriz = malla.matriz;
@@ -306,7 +367,19 @@ void eliminar_coincidencias_eje(int posY, int posX,int eje,Malla malla)
 
 }
 
-
+/**
+ * Busca si hay 3 o mas coincidencias de un elemento en un mismo sentido .
+ * Si las encuentra llama a la funcion eliminar_conicidencias_eje()
+ *
+ * @param posY
+ * 		Fila del elemento(entre 0 y n-1).
+ *
+ * @param PosX
+ * 		Columna del elemento(entre 0 y n-1).
+ *
+ * @param malla
+ * 		Estructura (definida en 'common.h') con los datos de la matriz de juego.
+ */
 void tratar_coincidencias(int posY, int posX, Malla malla)
 {
 	Diamante *matriz = malla.matriz;
@@ -338,7 +411,18 @@ void recorrer_malla_coincidencias (Malla malla)
 	}
 }
 
-
+/**
+ * Rellena los huecos que se dejan cuando se eliminan los diamantes
+ *
+ * @param posY
+ * 		Fila del elemento(entre 0 y n-1).
+ *
+ * @param PosX
+ * 		Columna del elemento(entre 0 y n-1).
+ *
+ * @param malla
+ * 		Estructura (definida en 'common.h') con los datos de la matriz de juego.
+ */
 void tratar_huecos(int posY, int posX, Malla malla)
 {
 	int cols = malla.dimens.columnas;
@@ -389,6 +473,9 @@ void eliminar_fila (int fila, Malla malla)
 	recorrer_malla_huecos(malla);
 }
 
+/**
+ * Reordenar tablero es auxiliar no tiene mucha importancia, no borrar 
+ */
 void reordenar_tablero (int posY,int posX,Malla malla)
 {
 	int cols = malla.dimens.columnas;
@@ -409,7 +496,6 @@ void reordenar_tablero (int posY,int posX,Malla malla)
 	}
 
 }
-
 
 void recorrer_malla_reorden (Malla malla)
 {
@@ -472,6 +558,9 @@ int es_posible_giro (int posY, int posX, Malla malla)
 	return res;
 }
 
+/**
+ * La bomba III, 
+ */
 void girar_matriz(int ejeY, int ejeX, Malla malla)
 {
 	if (es_posible_giro (ejeY, ejeX, malla) == 1)
