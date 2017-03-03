@@ -1,0 +1,105 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	/2397d79/
+AMA	libutils.h	/^#define AMA /;"	d
+AZU	libutils.h	/^#define AZU /;"	d
+BLA	libutils.h	/^#define BLA /;"	d
+CFLAGS	Makefile	/^CFLAGS=-Wall$/;"	m
+CON_CAMBIOS	common.h	/^#define CON_CAMBIOS /;"	d
+CYN	libutils.h	/^#define CYN /;"	d
+DETALLE_DEBUG	libutils.h	/^#define DETALLE_DEBUG	/;"	d
+DETALLE_EXTRA	libutils.h	/^#define DETALLE_EXTRA	/;"	d
+DETALLE_LOG	libutils.h	/^#define DETALLE_LOG	/;"	d
+DIAMANTE_MAX	common.h	/^#define DIAMANTE_MAX /;"	d
+DIAMANTE_VACIO	common.h	/^#define DIAMANTE_VACIO /;"	d
+Diamante	common.h	/^} Diamante;$/;"	t	typeref:struct:__anon3fde68840208
+Dim	common.h	/^} Dim;$/;"	t	typeref:struct:__anon3fde68840108
+ERR_ARCHIVO	common.h	/^#define ERR_ARCHIVO /;"	d
+ERR_ARGS	common.h	/^#define ERR_ARGS /;"	d
+ERR_MEM	common.h	/^#define ERR_MEM /;"	d
+GCC	Makefile	/^GCC=gcc$/;"	m
+LIB	Makefile	/^LIB=ar rcs$/;"	m
+MAX_NV	common.h	/^#define MAX_NV /;"	d
+MOV_ABAJO	candy.h	/^#define MOV_ABAJO /;"	d
+MOV_ARRIBA	candy.h	/^#define MOV_ARRIBA /;"	d
+MOV_DER	candy.h	/^#define MOV_DER /;"	d
+MOV_IZQ	candy.h	/^#define MOV_IZQ /;"	d
+MSG_AYUDA	libutils.h	/^#define MSG_AYUDA /;"	d
+MSG_MENU	menu.h	/^#define MSG_MENU /;"	d
+Malla	common.h	/^} Malla;$/;"	t	typeref:struct:__anon3fde68840308
+NOR	libutils.h	/^#define NOR /;"	d
+NVCC	Makefile	/^NVCC=nvcc$/;"	m
+OBJFLAGS	Makefile	/^OBJFLAGS=-Wall -c$/;"	m
+ROJ	libutils.h	/^#define ROJ /;"	d
+ROS	libutils.h	/^#define ROS /;"	d
+RST	libutils.h	/^#define RST /;"	d
+SIN_CAMBIOS	common.h	/^#define SIN_CAMBIOS /;"	d
+SUCCESS	common.h	/^#define SUCCESS /;"	d
+SUCC_ARGS	common.h	/^#define SUCC_ARGS /;"	d
+VER	libutils.h	/^#define VER /;"	d
+_CANDY_H_	candy.h	/^#define _CANDY_H_$/;"	d
+_COMMON_H_	common.h	/^#define _COMMON_H_$/;"	d
+_LIBUTILS_H_	libutils.h	/^#define _LIBUTILS_H_$/;"	d
+_MENU_H_	menu.h	/^#define _MENU_H_$/;"	d
+__anon3fde68840108	common.h	/^typedef struct {$/;"	s
+__anon3fde68840208	common.h	/^typedef struct {$/;"	s
+__anon3fde68840308	common.h	/^typedef struct {$/;"	s
+all	Makefile	/^all: candy$/;"	t
+bomba	menu.c	/^void bomba (Malla malla)$/;"	f	typeref:typename:void
+buscar_coincidencias	candy.c	/^int buscar_coincidencias(int posY, int posX, int sen,Malla malla)$/;"	f	typeref:typename:int
+cambiar_nivel	menu.c	/^void cambiar_nivel (Malla *malla)$/;"	f	typeref:typename:void
+cambiar_params	utils.c	/^void cambiar_params (Malla nuevos_params)$/;"	f	typeref:typename:void
+candy	Makefile	/^candy: candy.o libutils.a$/;"	t
+candy.o	Makefile	/^candy.o: candy.c candy.h common.h$/;"	t
+cargar	utils.c	/^int cargar (Malla *malla, const char *nombre_fichero)$/;"	f	typeref:typename:int
+cargar_partida	menu.c	/^void cargar_partida (Malla *antigua)$/;"	f	typeref:typename:void
+clean	Makefile	/^clean:$/;"	t
+columnas	common.h	/^	int columnas;$/;"	m	struct:__anon3fde68840108	typeref:typename:int
+crear_diamante	utils.c	/^Diamante crear_diamante (int num)$/;"	f	typeref:typename:Diamante
+dimens	common.h	/^	Dim dimens;		\/* Dimensiones de la matriz *\/$/;"	m	struct:__anon3fde68840308	typeref:typename:Dim
+eliminar_coincidencias	candy.c	/^void eliminar_coincidencias(int posY,int posX,int sen,Malla malla)$/;"	f	typeref:typename:void
+eliminar_coincidencias_eje	candy.c	/^void eliminar_coincidencias_eje(int posY, int posX,int eje,Malla malla)$/;"	f	typeref:typename:void
+eliminar_columna	candy.c	/^void eliminar_columna(int columna,Malla malla)$/;"	f	typeref:typename:void
+eliminar_fila	candy.c	/^void eliminar_fila (int fila, Malla malla)$/;"	f	typeref:typename:void
+es_posible_giro	candy.c	/^int es_posible_giro (int posY, int posX, Malla malla)$/;"	f	typeref:typename:int
+es_valido	candy.c	/^int es_valido(int posY, int posX, int mov, Malla malla)$/;"	f	typeref:typename:int
+filas	common.h	/^	int filas;$/;"	m	struct:__anon3fde68840108	typeref:typename:int
+generar_diamante	candy.c	/^Diamante generar_diamante()$/;"	f	typeref:typename:Diamante
+girar_matriz	candy.c	/^void girar_matriz(int ejeY, int ejeX, Malla malla)$/;"	f	typeref:typename:void
+guardar	utils.c	/^int guardar (Malla malla, const char *nombre_fichero)$/;"	f	typeref:typename:int
+guardar_partida	menu.c	/^void guardar_partida (Malla malla)$/;"	f	typeref:typename:void
+id	common.h	/^	int id;$/;"	m	struct:__anon3fde68840208	typeref:typename:int
+img	common.h	/^	const char *img;$/;"	m	struct:__anon3fde68840208	typeref:typename:const char *
+imprimir	utils.c	/^void imprimir (int detalle, const char *cadena, ...)$/;"	f	typeref:typename:void
+imprimir_info	utils.c	/^void imprimir_info ()$/;"	f	typeref:typename:void
+libutils.a	Makefile	/^libutils.a: utils.o menu.o$/;"	t
+main	candy.c	/^int main (int argc, char *argv[])$/;"	f	typeref:typename:int
+matriz	common.h	/^	Diamante *matriz;	\/* Matriz de juego *\/$/;"	m	struct:__anon3fde68840308	typeref:typename:Diamante *
+menu	menu.c	/^void menu (Malla malla)$/;"	f	typeref:typename:void
+menu.o	Makefile	/^menu.o: menu.c menu.h common.h$/;"	t
+modo_auto	utils.c	/^bool modo_auto = true;$/;"	v	typeref:typename:bool
+mostrar_malla	utils.c	/^void mostrar_malla (Malla malla)$/;"	f	typeref:typename:void
+mover	menu.c	/^void mover (Malla malla)$/;"	f	typeref:typename:void
+mover_diamante	candy.c	/^void mover_diamante(int posY, int posX, int mov, Malla malla)$/;"	f	typeref:typename:void
+nivel	common.h	/^	int nivel;		\/* Nivel actual *\/$/;"	m	struct:__anon3fde68840308	typeref:typename:int
+nivel	utils.c	/^int nivel = 1;$/;"	v	typeref:typename:int
+nivel_detalle	utils.c	/^int nivel_detalle = 0;$/;"	v	typeref:typename:int
+pedir_opcion	menu.c	/^int pedir_opcion (int min, int max)$/;"	f	typeref:typename:int
+procesar_args	utils.c	/^int procesar_args (int argc, char *argv [])$/;"	f	typeref:typename:int
+recorrer_malla_coincidencias	candy.c	/^void recorrer_malla_coincidencias (Malla malla)$/;"	f	typeref:typename:void
+recorrer_malla_giro	candy.c	/^void recorrer_malla_giro (Malla malla)$/;"	f	typeref:typename:void
+recorrer_malla_huecos	candy.c	/^void recorrer_malla_huecos (Malla malla)$/;"	f	typeref:typename:void
+recorrer_malla_reorden	candy.c	/^void recorrer_malla_reorden (Malla malla)$/;"	f	typeref:typename:void
+rellenar	utils.c	/^int rellenar (Malla *malla)$/;"	f	typeref:typename:int
+reordenar_tablero	candy.c	/^void reordenar_tablero (int posY,int posX,Malla malla)$/;"	f	typeref:typename:void
+reservar_mem	utils.c	/^int reservar_mem (Malla *malla)$/;"	f	typeref:typename:int
+son_iguales	candy.c	/^int son_iguales(Diamante d1,Diamante d2)$/;"	f	typeref:typename:int
+tam_matriz	utils.c	/^Dim tam_matriz = {$/;"	v	typeref:typename:Dim
+tratar_coincidencias	candy.c	/^void tratar_coincidencias(int posY, int posX, Malla malla)$/;"	f	typeref:typename:void
+tratar_huecos	candy.c	/^void tratar_huecos(int posY, int posX, Malla malla)$/;"	f	typeref:typename:void
+utils.o	Makefile	/^utils.o: utils.c libutils.h common.h$/;"	t
+ver_params	utils.c	/^Malla ver_params ()$/;"	f	typeref:typename:Malla
