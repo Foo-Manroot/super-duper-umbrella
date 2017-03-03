@@ -66,9 +66,19 @@ typedef struct {
 
 
 
-/* ----------------------- */
-/* DEFINICIONES DE ERRORES */
-/* ----------------------- */
+/* ------------------------------ */
+/* CÓDIGOS DE SALIDA DE FUNCIONES */
+/* ------------------------------ */
+
+/**
+ * Con cambios a la hora de recorrer la columna para tratar los huecos.
+ */
+#define CON_CAMBIOS 2
+
+/**
+ * Sin cambios a la hora de recorrer la columna para tratar los huecos.
+ */
+#define SIN_CAMBIOS 1
 
 /**
  * La función acabó sin problemas.
@@ -95,6 +105,5 @@ typedef struct {
  * Error al gestionar la memoria (reservar, liberar...)
  */
 #define ERR_MEM -3
-
 
 #endif

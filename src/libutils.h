@@ -46,7 +46,7 @@ joyas [-hman:f:c:v]\n\
 #define AZU "\x1B[34m"
 #define ROS "\x1B[35m"
 #define CYN "\x1B[36m"
-#define BLA "\x1B[37m"
+#define BLA "\x1B[30m"
 #define RST "\x1B[0m" //RESET
 
 /**

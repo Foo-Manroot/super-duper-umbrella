@@ -14,6 +14,9 @@ void menu (Malla malla)
 
 	while (!fin)
 	{
+		/* Comprueba los huecos */
+		recorrer_malla_cols (malla);
+
 		mostrar_malla (malla);
 		/* Imprime el menú y permite elegir opciones */
 		imprimir (DETALLE_LOG, MSG_MENU);
@@ -71,22 +74,33 @@ void mover (Malla malla)
 	/* Pide los datos */
 	imprimir (DETALLE_LOG, "Posición del elemento a mover:\n");
 	/* Fila */
-	imprimir (DETALLE_LOG, "\tFila (entre 0 y %i): ", malla.dimens.filas);
-	posY = pedir_opcion (0, malla.dimens.filas);
+	imprimir (DETALLE_LOG,
+		 "\tFila (entre 0 y %i): ",
+		 (malla.dimens.filas - 1));
+
+	posY = pedir_opcion (0, (malla.dimens.filas - 1));
 	/* Columna */
-	imprimir (DETALLE_LOG, "\tColumna (entre 0 y %i): ", malla.dimens.columnas);
-	posY = pedir_opcion (0, malla.dimens.columnas);
+	imprimir (DETALLE_LOG,
+		 "\tColumna (entre 0 y %i): ",
+		 (malla.dimens.columnas - 1));
+
+	posX = pedir_opcion (0, (malla.dimens.columnas - 1));
 	/* Movimiento */
 	imprimir (DETALLE_LOG, "Movimiento. Opciones disponibles:\n"
-				"\t0 -> derecha\n"
-				"\t1 -> abajo\n"
-				"\t2 -> izquierda\n"
-				"\t3 -> arriba\n"
-				"Introduzca el movimiento seleccionado: ");
-	mov = pedir_opcion (0, 3);
+				"\t%i -> derecha\n"
+				"\t%i -> abajo\n"
+				"\t%i -> izquierda\n"
+				"\t%i -> arriba\n"
+				"Introduzca el movimiento seleccionado: ",
+				MOV_DER,
+				MOV_ABAJO,
+				MOV_IZQ,
+				MOV_ARRIBA);
+	mov = pedir_opcion (MOV_DER, MOV_ARRIBA);
 
-	/* Realiza el movimiento */
+	/* Realiza el movimiento y comprueba si hay elementos alineados */
 	mover_diamante(posY, posX, mov, malla);
+	recorrer_malla_coincidencias (malla);
 }
 
 
@@ -114,20 +128,20 @@ void bomba (Malla malla)
 		case 1:
 			imprimir (DETALLE_LOG,
 				  "Fila (entre 0 y %i): ",
-				  malla.dimens.filas);
+				  (malla.dimens.filas - 1));
 
-			fila = pedir_opcion (0, malla.dimens.filas);
+			fila = pedir_opcion (0, (malla.dimens.filas - 1));
 			eliminar_fila (fila, malla);
 			break;
 
 		case 2: 
 			imprimir (DETALLE_LOG,
 				  "Columna (entre 0 y %i): ",
-				  malla.dimens.columnas);
+				  (malla.dimens.columnas - 1));
 
-			fila = pedir_opcion (0, malla.dimens.columnas);
+			columna = pedir_opcion (0, (malla.dimens.columnas - 1));
 
-			eliminar_columna(columna,malla);
+			eliminar_columna (columna, malla);
 			break;
 
 		case 3: 

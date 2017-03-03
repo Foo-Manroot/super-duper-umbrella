@@ -4,9 +4,22 @@
 #include "common.h"
 #include "libutils.h"
 
+/**
+ * Movimientos de diamantes posibles
+ */
+#define MOV_DER 0
+#define MOV_ABAJO 1
+#define MOV_IZQ 2
+#define MOV_ARRIBA 3
+
 /* ------------------------ */
 /* DECLARACIÓN DE FUNCIONES */
 /* ------------------------ */
+int tratar_huecos_col (Malla malla, int columna);
+void recorrer_malla_cols (Malla malla);
+
+
+
 void recorrer_malla_giro (Malla malla);
 void girar_matriz (int ejeY, int ejeX, Malla malla);
 
