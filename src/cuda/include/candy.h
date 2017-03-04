@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "libutils.h"
+#include "kernel.cuh"
 
 /**
  * Movimientos de diamantes posibles

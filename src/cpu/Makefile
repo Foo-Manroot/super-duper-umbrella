@@ -4,6 +4,10 @@ CFLAGS=-Wall
 OBJFLAGS=-Wall -c
 LIB=ar rcs
 
+# Directorios
+OUTDIR=obj
+INCDIR=include
+crear_dir=@mkdir -p $(@D)
 
 ####
 # Ayuda para el Makefile:
@@ -22,22 +26,26 @@ all: candy
 #----
 
 ####
-candy: candy.o libutils.a
+candy: $(OUTDIR)/candy.o $(OUTDIR)/libutils.a
 	$(GCC) $(CFLAGS) $^ -o $@
 
-candy.o: candy.c candy.h common.h
+$(OUTDIR)/candy.o: candy.c $(INCDIR)/candy.h $(INCDIR)/common.h
+	$(crear_dir)
 	$(GCC) $(OBJFLAGS) $< -o $@
 #----
 
 ####
 # Biblioteca para el intérprete de comandos
-libutils.a: utils.o menu.o
+$(OUTDIR)/libutils.a: $(OUTDIR)/utils.o $(OUTDIR)/menu.o
+	$(crear_dir)
 	$(LIB) $@ $^
 
-utils.o: utils.c libutils.h common.h
+$(OUTDIR)/utils.o: utils.c $(INCDIR)/libutils.h $(INCDIR)/common.h
+	$(crear_dir)
 	$(GCC) $(OBJFLAGS) $< -o $@
 
-menu.o: menu.c menu.h common.h
+$(OUTDIR)/menu.o: menu.c $(INCDIR)/menu.h $(INCDIR)/common.h
+	$(crear_dir)
 	$(GCC) $(OBJFLAGS) $< -o $@
 #----
 
@@ -51,8 +59,8 @@ menu.o: menu.c menu.h common.h
 #### --------------------------------------------------- ####
 
 clean:
-	rm -f *.o *.a
+	rm -rf *.o *.a $(OUTDIR)
 	rm -f candy
-	rm -f joyas-CUDA
 	rm -f gprof
 	rm -f gmon.out profile.txt
+####
