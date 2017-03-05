@@ -21,34 +21,30 @@ crear_dir=@mkdir -p $(@D)
 all: candy
 
 ####
-$(OUTDIR)/cuda.o: kernel.cu $(INCDIR)/kernel.cuh
-	$(crear_dir)
-	$(NVCC) -c $< -o $@
-#----
-
-####
+# Objetivo principal
+#
 candy: $(OUTDIR)/cuda.o $(OUTDIR)/candy.o $(OUTDIR)/libutils.a
 	$(GCC) $(CFLAGS) $^ -o $@
-
-$(OUTDIR)/candy.o: candy.c $(INCDIR)/candy.h $(INCDIR)/common.h
-	$(crear_dir)
-	$(GCC) $(OBJFLAGS) $< -o $@
 #----
 
 ####
-# Biblioteca para el intérprete de comandos
+# Archivo con los núcleos para CUDA
+#
+$(OUTDIR)/cuda.o: kernel.cu $(INCDIR)/kernel.cuh
+	$(crear_dir)
+	$(NVCC) $(OBJFLAGS) $< -o $@
+#----
+
+####
+# Biblioteca para el intérprete de comandos y las funciones auxiliares
+#
 $(OUTDIR)/libutils.a: $(OUTDIR)/utils.o $(OUTDIR)/menu.o
 	$(crear_dir)
 	$(LIB) $@ $^
 
-$(OUTDIR)/utils.o: utils.c $(INCDIR)/libutils.h $(INCDIR)/common.h
+$(OUTDIR)/%.o: %.cpp $(INCDIR)/*.h
 	$(crear_dir)
 	$(GCC) $(OBJFLAGS) $< -o $@
-
-$(OUTDIR)/menu.o: menu.c $(INCDIR)/menu.h $(INCDIR)/common.h
-	$(crear_dir)
-	$(GCC) $(OBJFLAGS) $< -o $@
-#----
 
 #### --------------------------------------------------- ####
 # Compila con las opciones necesarias para perfilar con gprof

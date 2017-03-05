@@ -9,10 +9,14 @@ int main (int argc, char *argv[])
 		return SUCCESS;
 	}
 
-	Malla malla = {
-		.dimens = ver_params ().dimens,
-		.nivel = ver_params ().nivel
-	};
+//	Malla malla = {
+//		.dimens = ver_params ().dimens,
+//		.nivel = ver_params ().nivel
+//	};
+	/* El compilador es una mierda, así que hay que inicializar a mano */
+	Malla malla;
+	malla.dimens = ver_params ().dimens;
+	malla.nivel = ver_params ().nivel;
 
 	/* Reserva memoria para la matriz y la rellena */
 	reservar_mem (&malla);

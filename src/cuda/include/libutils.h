@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "menu.h"
+#include "kernel.cuh"
 
 #include <stdarg.h>
 #include <stdbool.h>

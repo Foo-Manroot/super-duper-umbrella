@@ -401,7 +401,8 @@ int rellenar (Malla *malla)
 	/* Comprueba que la matriz tiene memoria reservada */
 	if (malla->matriz == NULL)
 	{
-		imprimir (DETALLE_DEBUG, "Error al intentar reservar la memoria para la matriz\n");
+		imprimir (DETALLE_DEBUG,
+			  "Error: la matriz no tiene memoria reservada\n");
 		return ERR_MEM;
 	}
 

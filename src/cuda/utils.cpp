@@ -153,12 +153,17 @@ void cambiar_params (Malla nuevos_params)
  */
 Malla ver_params ()
 {
-	Malla malla = {
-
-		.dimens = tam_matriz,
-		.nivel = nivel,
-		.matriz = 0
-	};
+//	Malla malla = {
+//
+//		.dimens = tam_matriz,
+//		.nivel = nivel,
+//		.matriz = 0
+//	};
+	/* El compilador es una mierda, así que hay que inicializar a mano */
+	Malla malla;
+	malla.dimens = tam_matriz;
+	malla.nivel = nivel;
+	malla.matriz = 0;
 
 	return malla;
 }
@@ -326,7 +331,7 @@ int cargar (Malla *malla, const char *nombre_fichero)
  *
  *
  * @return
- * 		SUCCESS si todo ha salido correctamente
+ * 		SUCCESS si todo ha salido correctamente.
  * 		ERR_MEM si hubo algún error al intentar reservar la memoria.
  */
 int reservar_mem (Malla *malla)
@@ -369,52 +374,13 @@ int reservar_mem (Malla *malla)
  *
  *
  * @return
- * 		SUCCESS si todo ha salido correctamente
+ * 		SUCCESS si todo ha salido correctamente.
+ * 		ERR_CUDA si alguna función CUDA ha fallado.
  */
 int rellenar (Malla *malla)
 {
-	int filas = malla->dimens.filas,
-	    columnas = malla->dimens.columnas,
-	    i,
-	    j;
-	Diamante diamante;
-	int max = DIAMANTE_VACIO;
-
-	switch (malla->nivel)
-	{
-		case 1:
-			max = 4;
-			break;
-
-		case 2:
-			max = 6;
-			break;
-
-		case 3:
-			max = DIAMANTE_MAX;
-			break;
-
-		default:
-			max = DIAMANTE_MAX;
-	}
-
-	/* Comprueba que la matriz tiene memoria reservada */
-	if (malla->matriz == NULL)
-	{
-		imprimir (DETALLE_DEBUG, "Error al intentar reservar la memoria para la matriz\n");
-		return ERR_MEM;
-	}
-
-	srand (time (NULL));
-	/* Asigna valores aleatorios al diamante */
-	for (i = 0; i < filas; i++)
-	{
-		for (j = 0; j < columnas; j++)
-		{
-			diamante = crear_diamante ((rand () % max) + 1);
-			malla->matriz [(i * columnas) + j] = diamante;
-		}
-	}
+	/* Llama a la función para CUDA encargada de llamar a los núcleos */
+	matriz_aleat (malla);
 
 	return SUCCESS;
 }

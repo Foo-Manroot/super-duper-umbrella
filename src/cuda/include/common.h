@@ -106,4 +106,9 @@ typedef struct {
  */
 #define ERR_MEM -3
 
+/**
+ * Error producido en alguna función de CUDA
+ */
+#define ERR_CUDA -4
+
 #endif
