@@ -60,6 +60,65 @@ __global__ void generar_aleat (unsigned long semilla,
 /* -------------------- */
 
 /**
+ * Obtiene las dimensiones de los hilos necesarias para ejecutar la matriz con las
+ * dimensiones especificadas, teniendo en cuenta las limitaciones del dispositivo.
+ *
+ * @param bloques
+ *		Elemento de tipo dim3 para almacenar las dimensiones de los bloques
+ *	dentro de la rejilla (2D).
+ *
+ * @param hilos
+ *		Elemento de tipo dim3 para almacenar las dimensiones de los hilos dentro
+ *	de los bloques (3D).
+ *
+ * @param tam_matriz
+ *		Estructura Dim (definida en 'commno.h') con las dimensiones de la matriz
+ *	que se desea usar en el dispositivo.
+ *
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		ERR_CUDA si hubo algún error al obtener las características del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
+ */
+int obtener_dim (dim3 bloques, dim3 hilos, Dim tam_matriz)
+{
+	return SUCCESS;
+}
+
+
+/**
+ * Copia la información de la matriz de enteros (el resultado devuelto por el
+ * dispositivo) en la matriz de juego con la que trabaja la CPU.
+ *
+ * @param matriz_d
+ *		Matriz de enteros con los resultados de la tarjeta.
+ *
+ * @param malla
+ *		Malla con la información del juego, cuya matriz va a ser actualizada.
+ */
+void copiar_matriz (int *matriz_d, Malla *malla)
+{
+	int i,
+	    j,
+	    idx,
+	    filas = malla->dimens.filas,
+	    columnas = malla->dimens.columnas;
+
+	for (i = 0; i < filas; i++)
+	{
+		for (j = 0; j < columnas; j++)
+		{
+			idx = (i * columnas) + j;
+			malla->matriz [idx] = crear_diamante (matriz_d [idx]);
+		}
+	}
+}
+
+
+/**
  * Rellena la matriz de juego con diamantes aleatorios.
  *
  * @param malla
@@ -76,10 +135,7 @@ int matriz_aleat (Malla *malla)
 	int max = DIAMANTE_VACIO,
 	    filas = malla->dimens.filas,
 	    columnas = malla->dimens.columnas,
-	    tam = filas * columnas,
-	    i,
-	    j,
-	    idx;
+	    tam = filas * columnas;
 	cudaError_t err;
 
 	int *matriz_d,
@@ -132,14 +188,35 @@ int matriz_aleat (Malla *malla)
 	/* Copiar directamente un array de Diamante desde el dispositivo da problemas,
 	así que se usa un array de enteros para crear los números aleatorios en
 	paralelo y luego la CPU se encarga de crear los elementos de tipo Diamante */
-	for (i = 0; i < filas; i++)
-	{
-		for (j = 0; j < columnas; j++)
-		{
-			idx = (i * columnas) + j;
-			malla->matriz [idx] = crear_diamante (aux [idx]);
-		}
-	}
+	copiar_matriz (aux, malla);
+
+	/* Se libera la memoria del dispositivo */
+	CUDA (err,
+		cudaFree (matriz_d)
+	);
 
 	return SUCCESS;
 }
+
+
+/**
+ * Función para ejecutar la bomba I (eliminar fila).
+ *
+ * @param malla
+ *		Estructura con la información del juego.
+ *
+ * @param fila
+ *		Fila que se debe eliminar (poner a DIAMANTE_VACIO).
+ *
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		CUDA_ERR si hubo algún error relacionado con CUDA.
+ */
+//int bomba_fila (Malla malla, int fila)
+//{
+//	
+//
+//	return SUCCESS;
+//}
+

@@ -86,4 +86,31 @@ __global__ void generar_aleat (curandState *estado,
  */
 int matriz_aleat (Malla *malla);
 
+/**
+ * Obtiene las dimensiones de los hilos necesarias para ejecutar la matriz con las
+ * dimensiones especificadas, teniendo en cuenta las limitaciones del dispositivo.
+ *
+ * @param bloques
+ *		Elemento de tipo dim3 para almacenar las dimensiones de los bloques
+ *	dentro de la rejilla (2D).
+ *
+ * @param hilos
+ *		Elemento de tipo dim3 para almacenar las dimensiones de los hilos dentro
+ *	de los bloques (3D).
+ *
+ * @param tam_matriz
+ *		Estructura Dim (definida en 'commno.h') con las dimensiones de la matriz
+ *	que se desea usar en el dispositivo.
+ *
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		ERR_CUDA si hubo algún error al obtener las características del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
+ */
+int obtener_dim (dim3 bloques, dim3 hilos, Dim tam_matriz);
+
+
 #endif

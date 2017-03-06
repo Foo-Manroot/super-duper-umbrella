@@ -81,15 +81,15 @@ typedef struct {
 #define SIN_CAMBIOS 1
 
 /**
- * La función acabó sin problemas.
- */
-#define SUCCESS 0
-
-/**
  * Éxito al procesar un argumento que requiere que se termine la ejecución (por ejemplo,
  * la opción '-h'.
  */
 #define SUCC_ARGS 1
+
+/**
+ * La función acabó sin problemas.
+ */
+#define SUCCESS 0
 
 /**
  * Error al pasar los argumentos a la función.
@@ -102,13 +102,18 @@ typedef struct {
 #define ERR_ARCHIVO -2
 
 /**
- * Error al gestionar la memoria (reservar, liberar...)
+ * Error al gestionar memoria (reservar, liberar...).
  */
 #define ERR_MEM -3
 
 /**
- * Error producido en alguna función de CUDA
+ * Error producido en alguna función de CUDA.
  */
 #define ERR_CUDA -4
+
+/**
+ * Error al intentar utilizar una matriz que no cabe en el dispositivo.
+ */
+#define ERR_TAM -5
 
 #endif
