@@ -23,7 +23,7 @@
  * error, devuelve (return) ERR_CUDA.
  */
 #define KERNEL(err, nombre, bloques, hilos, ...)				\
-	imprimir (DETALLE_LOG,  "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n"		\
+	imprimir (DETALLE_DEBUG,  "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n"		\
 				"Lanzando el núcleo '%s' con las "		\
 				"siguientes dimensiones: \n"			\
 				"\tBloques: x=%d, y=%d\n"			\
