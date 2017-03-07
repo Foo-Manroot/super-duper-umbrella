@@ -7,6 +7,7 @@
 #include <cuda.h>
 #include <curand.h>
 #include <curand_kernel.h>
+#include <math.h>
 
 /**
  * Realiza la llamada a la función CUDA y comprueba el valor devuelto. Si hay algún

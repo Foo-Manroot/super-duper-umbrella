@@ -83,8 +83,51 @@ __global__ void generar_aleat (unsigned long semilla,
  *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
  *	dispositivo.
  */
-int obtener_dim (dim3 bloques, dim3 hilos, Dim tam_matriz)
+int obtener_dim (dim3 *bloques, dim3 *hilos, Dim tam_matriz)
 {
+	cudaDeviceProp propiedades;
+	cudaError_t err;
+	int id_dispos = -1;
+
+	/* Busca el dispositivo con versión >= 2 (para poder usar más hilos
+	por bloque) */
+	propiedades.major = 2;
+
+	CUDA (err,
+	cudaChooseDevice (&id_dispos, &propiedades)
+	);
+	/* Actualiza la información del dispositivo (chooseDevice no lo hizo
+	correctamente) */
+	CUDA (err,
+	cudaGetDeviceProperties (&propiedades, id_dispos)
+	);
+
+	imprimir (DETALLE_DEBUG, "\n -> Escogido dispositivo %d, con versión %d.%d\n\n",
+				id_dispos,
+				propiedades.major, propiedades.minor);
+
+	cudaSetDevice (id_dispos);
+
+	/* Número constante de hilos por bloque (para versiones anteriores
+	a Fermi, 16 hilos) */
+	hilos->x = (propiedades.major < 2)? 16 : 32;
+	hilos->y = (propiedades.major < 2)? 16 : 32;
+	hilos->z = 1;
+
+	/* Se calcula el número de bloques que se deben utilizar */
+	bloques->x = ceil (((float) tam_matriz.columnas) / ((float) hilos->x));
+	bloques->y = ceil (((float) tam_matriz.filas) / ((float) hilos->y));
+	bloques->z = 1;
+
+	/* Si la matriz no cabe, se avisa */
+	if ((bloques->x > propiedades.maxGridSize [0])
+		|| (bloques->y > propiedades.maxGridSize [1]))
+	{
+		imprimir (DETALLE_LOG, "\n -> Error: la matriz es demasiado grande "
+					"para el dispositivo\n");
+		return ERR_TAM;
+	}
+
 	return SUCCESS;
 }
 
@@ -136,7 +179,11 @@ int matriz_aleat (Malla *malla)
 	    filas = malla->dimens.filas,
 	    columnas = malla->dimens.columnas,
 	    tam = filas * columnas;
+
 	cudaError_t err;
+
+	dim3 bloques,
+	     hilos;
 
 	int *matriz_d,
 	    *aux = (int *) malloc (tam * sizeof aux [0]);
@@ -172,8 +219,7 @@ int matriz_aleat (Malla *malla)
 	);
 
 	/* Llama al núcleo para inicializar la secuencia de números aleatorios */
-	dim3 bloques (1);
-	dim3 hilos (columnas, filas);
+	obtener_dim (&bloques, &hilos, malla->dimens);
 
 	/* Genera los números aleatorios y los copia en la matriz */
 	KERNEL (err, generar_aleat,

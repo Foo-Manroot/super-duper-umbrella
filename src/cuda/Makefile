@@ -1,6 +1,10 @@
+# Para ver los registros usados por cada núcleo, compilar con
+# NVCCFLAGS=--ptxas-options=-v
+
 GCC=nvcc
 NVCC=nvcc
 CFLAGS=
+NVCCFLAGS=
 OBJFLAGS=-c
 LIB=ar rcs
 
@@ -32,7 +36,7 @@ candy: $(OUTDIR)/cuda.o $(OUTDIR)/candy.o $(OUTDIR)/libutils.a
 #
 $(OUTDIR)/cuda.o: kernel.cu $(INCDIR)/kernel.cuh
 	$(crear_dir)
-	$(NVCC) $(OBJFLAGS) $< -o $@
+	$(NVCC) $(OBJFLAGS) $(NVCCFLAGS) $< -o $@
 #----
 
 ####
