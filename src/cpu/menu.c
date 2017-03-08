@@ -21,8 +21,8 @@ void menu (Malla malla)
 		/* Imprime el menú y permite elegir opciones */
 		imprimir (DETALLE_LOG, MSG_MENU);
 
-		/* Pide la opción seleccionada (entre el 0 y el 5) */
-		selecc = pedir_opcion (0, 5);
+		/* Pide la opción seleccionada (entre el 0 y el 6) */
+		selecc = pedir_opcion (0, 6);
 
 		/*
 		Opciones disponibles:
@@ -32,6 +32,7 @@ void menu (Malla malla)
 			3.- Guardar partida
 			4.- Cargar partida
 			5.- Cambiar nivel
+			6.- Jugada automática
 		*/
 		switch (selecc)
 		{
@@ -53,10 +54,14 @@ void menu (Malla malla)
 			case 5:
 				cambiar_nivel (&malla);
 				break;
+			case 6:
+
+				break;
 			default:
 				imprimir(DETALLE_LOG, "Opción no reconocida.\n");
 		}
 		recorrer_malla_coincidencias(malla);
+		recorrer_malla_huecos(malla);
 	}
 }
 
@@ -102,7 +107,7 @@ void mover (Malla malla)
 	/* Realiza el movimiento y comprueba si hay elementos alineados */
 	mover_diamante (posY, posX, mov, malla);
 	recorrer_malla_coincidencias (malla);
-	recorrer_malla_huecos(malla);
+	
 
 }
 
