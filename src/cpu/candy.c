@@ -606,4 +606,3 @@ void recorrer_malla_giro (Malla malla)
 
 }
 
-void 
