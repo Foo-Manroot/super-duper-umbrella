@@ -22,6 +22,7 @@ Opciones disponibles:\n\
 	3.- Guardar partida\n\
 	4.- Cargar partida\n\
 	5.- Cambiar nivel\n\
+	6.- Jugada automática\n\
 ---------------------\n\
 Introduzca la opción seleccionada: "
 

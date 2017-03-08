@@ -99,6 +99,9 @@ int main (int argc, char *argv[])
  */
 Diamante generar_diamante()
 {
+	struct timeval delta;
+	gettimeofday(&delta, NULL);
+
 	Diamante d;
 	int max = DIAMANTE_VACIO;
 
@@ -121,8 +124,9 @@ Diamante generar_diamante()
 	}
 
 	/* Genera un id aleatorio */
-	srand (time (NULL));
-	d = crear_diamante ((rand () % max) + 1);
+
+	srand(delta.tv_usec);
+	d = crear_diamante ((rand()% max) + 1);
 
 	return d;
 }
@@ -601,3 +605,5 @@ void recorrer_malla_giro (Malla malla)
 	}
 
 }
+
+void 

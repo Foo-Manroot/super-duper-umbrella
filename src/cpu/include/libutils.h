@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/time.h>
+
 
 /**
  * Mensaje de ayuda para mostrar el funcionamiento del programa.
