@@ -20,16 +20,9 @@
 /* ------------------------ */
 void recorrer_malla (Malla malla);
 
-void recorrer_malla_giro (Malla malla);
-void girar_matriz (int ejeY, int ejeX, Malla malla);
-
-int es_posible_giro (int posY, int posX, Malla malla);
-void eliminar_columna (int columna,Malla malla);
-
 void recorrer_malla_reorden (Malla malla);
 void reordenar_tablero (int posY,int posX,Malla malla);
 
-void eliminar_fila (int fila, Malla malla);
 void recorrer_malla_huecos (Malla malla);
 
 void tratar_huecos(int posY, int posX, Malla malla);
