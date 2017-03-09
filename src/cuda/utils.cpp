@@ -470,3 +470,29 @@ void imprimir (int detalle, const char *cadena, ...)
 
 	va_end (args);
 }
+
+
+/**
+ * Obtiene el máximo diamante a generar, según el nivel especificado en la malla
+ *
+ * @param Malla
+ *		Estructura con la información del nivel actual.
+ *
+ *
+ * @return
+ *		El valor máximo del diamante que se puede generar, en función del nivel.
+ */
+int max_nv (Malla malla)
+{
+	switch (malla.nivel)
+	{
+		case 1:
+			return 4;
+		case 2:
+			return 6;
+		case 3:
+			return DIAMANTE_MAX;
+		default:
+			return DIAMANTE_MAX;
+	}
+}

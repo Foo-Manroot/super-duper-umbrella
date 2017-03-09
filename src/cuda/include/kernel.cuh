@@ -67,6 +67,35 @@ __global__ void generar_aleat (curandState *estado,
 			       int *resultado,
 			       int min,
 			       int max);
+/**
+ * Mueve todos los elementos a la izquierda de fila_bomba hacia su derecha. Cuando llega
+ * al primer elemento, genera un nuevo elemento.
+ *
+ * @param semilla
+ *		Elemento inicial para generar la secuencia.
+ *
+ * @param resultado
+ *		Vector en el que se almacenarán los números generados.
+ *
+ * @param min
+ *		Límite inferior para generar un número (inclusivo).
+ *
+ * @param max
+ *		Límite superior para generar un número (inclusivo).
+ *
+ * @param dimens
+ *		Dimensiones de la matriz resultado.
+
+ *
+ * @param fila_bomb
+ *		Fila a eliminar.
+ */
+__global__ void eliminar_fila (unsigned long semilla,
+			       int *resultado,
+			       const int min,
+			       const int max,
+			       const Dim dimens,
+			       int fila_bomba);
 
 /* ----------------------------------- */
 /* DECLARACIÓN DE FUNCIONES AUXILIARES */
@@ -113,5 +142,20 @@ int matriz_aleat (Malla *malla);
  */
 int obtener_dim (dim3 bloques, dim3 hilos, Dim tam_matriz);
 
+/**
+ * Función para ejecutar la bomba I (eliminar fila).
+ *
+ * @param fila_bomba
+ *		Fila que se debe eliminar (poner a DIAMANTE_VACIO).
+ *
+ * @param malla
+ *		Estructura con la información del juego.
+ *
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		CUDA_ERR si hubo algún error relacionado con CUDA.
+ */
+int bomba_fila (int fila_bomba, Malla *malla);
 
 #endif

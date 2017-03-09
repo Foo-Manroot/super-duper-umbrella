@@ -14,9 +14,6 @@ void menu (Malla malla)
 
 	while (!fin)
 	{
-		/* Comprueba los huecos */
-//		recorrer_malla (malla);
-
 		mostrar_malla (malla);
 		/* Imprime el menú y permite elegir opciones */
 		imprimir (DETALLE_LOG, MSG_MENU);
@@ -137,7 +134,8 @@ void bomba (Malla malla)
 				  (malla.dimens.filas - 1));
 
 			fila = pedir_opcion (0, (malla.dimens.filas - 1));
-			eliminar_fila (fila, malla);
+			/* Llama a la función que utiliza CUDA */
+			bomba_fila (fila, &malla);
 			break;
 
 		case 2: 

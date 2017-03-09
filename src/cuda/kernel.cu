@@ -35,6 +35,7 @@ __global__ void generar_aleat (unsigned long semilla,
 
 	curandState estado;
 
+	/* Comprueba los límites de la matriz */
 	if ((fila <= dimens.filas)
 	   && (columna <= dimens.columnas))
 	{
@@ -54,6 +55,77 @@ __global__ void generar_aleat (unsigned long semilla,
 		resultado [aux] = rand_int;
 	}
 }
+
+/**
+ * Mueve todos los elementos a la izquierda de fila_bomba hacia su derecha. Cuando llega
+ * al primer elemento, genera un nuevo elemento.
+ *
+ * @param semilla
+ *		Elemento inicial para generar la secuencia.
+ *
+ * @param resultado
+ *		Vector en el que se almacenarán los números generados.
+ *
+ * @param min
+ *		Límite inferior para generar un número (inclusivo).
+ *
+ * @param max
+ *		Límite superior para generar un número (inclusivo).
+ *
+ * @param dimens
+ *		Dimensiones de la matriz resultado.
+
+ *
+ * @param fila_bomb
+ *		Fila a eliminar.
+ */
+__global__ void eliminar_fila (unsigned long semilla,
+			       int *resultado,
+			       const int min,
+			       const int max,
+			       const Dim dimens,
+			       int fila_bomba)
+{
+	int fila = blockIdx.y * blockDim.y + threadIdx.y,
+	    columna = blockIdx.x * blockDim.x + threadIdx.x,
+	    i,
+	    rand_int;
+
+	curandState estado;
+
+	float rand_f;
+
+	if ((columna >= dimens.columnas)
+		|| (fila != fila_bomba))
+	{
+		return;
+	}
+
+	/* Intercambia los elementos desde la fila actual hasta el principio */
+	for (i = fila_bomba; i > 0; i--)
+	{
+		resultado [(i * dimens.columnas) + columna]
+			= resultado [( (i - 1) * dimens.columnas ) + columna];
+	}
+
+	/* Genera el último elemento */
+	curand_init (semilla, columna, 0, &estado);
+	/* El número se genera primero con coma flotante (ajustando los
+	límites como se haya especificado) y luego se convierte a entero.
+	Esto es más rápido que realizar la operación de módulo */
+	rand_f = curand_uniform (&estado);
+
+	rand_f *= (max - min + 0.999999);
+	rand_f += min;
+
+	/* Convierte el float a entero */
+	rand_int = __float2int_rz (rand_f);
+
+	/* Guarda el resultado */
+	resultado [columna] = rand_int;
+
+}
+
 
 /* -------------------- */
 /* FUNCIONES AUXILIARES */
@@ -94,12 +166,12 @@ int obtener_dim (dim3 *bloques, dim3 *hilos, Dim tam_matriz)
 	propiedades.major = 2;
 
 	CUDA (err,
-	cudaChooseDevice (&id_dispos, &propiedades)
+		cudaChooseDevice (&id_dispos, &propiedades)
 	);
 	/* Actualiza la información del dispositivo (chooseDevice no lo hizo
 	correctamente) */
 	CUDA (err,
-	cudaGetDeviceProperties (&propiedades, id_dispos)
+		cudaGetDeviceProperties (&propiedades, id_dispos)
 	);
 
 	imprimir (DETALLE_DEBUG, "\n -> Escogido dispositivo %d, con versión %d.%d\n\n",
@@ -160,7 +232,6 @@ void copiar_matriz (int *matriz_d, Malla *malla)
 	}
 }
 
-
 /**
  * Rellena la matriz de juego con diamantes aleatorios.
  *
@@ -188,23 +259,7 @@ int matriz_aleat (Malla *malla)
 	int *matriz_d,
 	    *aux = (int *) malloc (tam * sizeof aux [0]);
 
-	switch (malla->nivel)
-	{
-		case 1:
-			max = 4;
-			break;
-
-		case 2:
-			max = 6;
-			break;
-
-		case 3:
-			max = DIAMANTE_MAX;
-			break;
-
-		default:
-			max = DIAMANTE_MAX;
-	}
+	max = max_nv (*malla);
 
 	/* Comprueba que la matriz tiene memoria reservada */
 	if (malla->matriz == NULL)
@@ -224,9 +279,9 @@ int matriz_aleat (Malla *malla)
 	/* Genera los números aleatorios y los copia en la matriz */
 	KERNEL (err, generar_aleat,
 		bloques, hilos,
-		time (NULL), matriz_d, 1, max, malla->dimens);
+		time (NULL), matriz_d, 1, max, malla->dimens
+	);
 
-	/* Usa la matriz auxiliar con los números aleatorios para crear los diamantes */
 	CUDA (err,
 		cudaMemcpy (aux, matriz_d, tam * sizeof aux [0], cudaMemcpyDeviceToHost)
 	);
@@ -248,21 +303,80 @@ int matriz_aleat (Malla *malla)
 /**
  * Función para ejecutar la bomba I (eliminar fila).
  *
+ * @param fila_bomba
+ *		Fila que se debe eliminar (poner a DIAMANTE_VACIO).
+ *
  * @param malla
  *		Estructura con la información del juego.
- *
- * @param fila
- *		Fila que se debe eliminar (poner a DIAMANTE_VACIO).
  *
  *
  * @return
  *		SUCCESS si todo ha salido correctamente.
  *		CUDA_ERR si hubo algún error relacionado con CUDA.
  */
-//int bomba_fila (Malla malla, int fila)
-//{
-//	
-//
-//	return SUCCESS;
-//}
+int bomba_fila (int fila_bomba, Malla *malla)
+{
+	cudaError_t err;
+	dim3 bloques,
+	     hilos;
 
+	int tam = malla->dimens.filas * malla->dimens.columnas,
+	    i,
+	    j,
+	    idx = 0,
+	    max = max_nv (*malla);
+
+	int *matriz_d,
+	    *aux = (int *) malloc (tam * sizeof aux [0]);
+
+	/* Dimensiones para luego crear un hilo por columna */
+	Dim dim_matr_hilos;
+
+	dim_matr_hilos.filas = 1;
+	dim_matr_hilos.columnas = malla->dimens.columnas;
+
+	/* Inicialoza la matriz auxiliar */
+	for (i = 0; i < malla->dimens.filas; i++)
+	{
+		for (j = 0; j < malla->dimens.columnas; j++)
+		{
+			idx = (i * malla->dimens.columnas) + j;
+			aux [idx] = malla->matriz [idx].id;
+		}
+	}
+
+	/* Reserva memoria en el dispositivo y copia la matriz */
+	CUDA (err,
+		cudaMalloc ((void **) &matriz_d,
+				tam * sizeof matriz_d [0])
+	);
+
+	CUDA (err,
+		cudaMemcpy (matriz_d, aux, tam * sizeof matriz_d [0],
+				cudaMemcpyHostToDevice)
+	);
+
+	/* Llama al núcleo para eliminar la fila */
+	obtener_dim (&bloques, &hilos, dim_matr_hilos);
+
+	KERNEL (err, eliminar_fila,
+		bloques, hilos,
+		time (NULL), matriz_d, 1, max, malla->dimens, fila_bomba
+	);
+
+	/* Copia la información de vuelta y libera la memoria en el dispositivo */
+	CUDA (err,
+		cudaMemcpy (aux, matriz_d, tam * sizeof aux [0], cudaMemcpyDeviceToHost)
+	);
+
+	/* Copiar directamente un array de Diamante desde el dispositivo da problemas,
+	así que se usa un array de enteros para crear los números aleatorios en
+	paralelo y luego la CPU se encarga de crear los elementos de tipo Diamante */
+	copiar_matriz (aux, malla);
+
+	CUDA (err,
+		cudaFree (matriz_d)
+	);
+
+	return SUCCESS;
+}
