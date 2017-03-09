@@ -1,5 +1,55 @@
 #include "include/kernel.cuh"
 
+/* ------------------------ */
+/* FUNCIONES DE DISPOSITIVO */
+/* ------------------------ */
+
+/**
+ * Comprueba si es posible realizar un giro de 3x3 en la posición dada.
+ *
+ * @param posY
+ * 		Coordenada Y del eje a comprobar.
+ *
+ * @param posX
+ * 		Coordenada X del eje a comprobar.
+ *
+ * @param dimens
+ * 		Dimensiones de la matriz a comprobar.
+ * 
+ *
+ * @return
+ *		true si es posible.
+ *		false si no lo es.
+ */
+__device__ bool comprobar_giro (int posY, int posX, Dim dimens)
+{
+	int filas = dimens.filas,
+	    cols = dimens.columnas;
+
+	/* Comprueba los límites del eje de giro */
+	if ( ((posY + 1) >= filas)
+		|| ((posX + 1) >= cols) )
+	{
+		return false;
+	}
+
+	if(((posY - 1) == 0)
+		|| ((posY - 1) % 3) == 0)
+	{
+		/* Posición correcta para el eje Y */
+		if(((posX - 1) == 0)
+			|| ((posX - 1) % 3) == 0)
+		{
+			/* Posición correcta para el eje X */
+			return true;
+		}
+
+	}
+
+	return false;
+
+}
+
 /* ------- */
 /* NÚCLEOS */
 /* ------- */
@@ -61,10 +111,11 @@ __global__ void generar_aleat (unsigned long semilla,
  * al primer elemento, genera un nuevo elemento.
  *
  * @param semilla
- *		Elemento inicial para generar la secuencia.
+ *		Elemento inicial para generar la secuencia (para crear los
+ *	nuevos elementos).
  *
  * @param resultado
- *		Vector en el que se almacenarán los números generados.
+ *		Vector que almacena la matriz que va a ser cambiada.
  *
  * @param min
  *		Límite inferior para generar un número (inclusivo).
@@ -131,10 +182,11 @@ __global__ void eliminar_fila (unsigned long semilla,
  * al primer elemento, genera un nuevo elemento.
  *
  * @param semilla
- *		Elemento inicial para generar la secuencia.
+ *		Elemento inicial para generar la secuencia (para crear los
+ *	nuevos elementos).
  *
  * @param resultado
- *		Vector en el que se almacenarán los números generados.
+ *		Vector que almacena la matriz que va a ser cambiada.
  *
  * @param min
  *		Límite inferior para generar un número (inclusivo).
@@ -193,6 +245,62 @@ __global__ void eliminar_columna (unsigned long semilla,
 
 	/* Guarda el resultado */
 	resultado [fila * dimens.columnas] = rand_int;
+}
+
+/**
+ * Gira todos los elementos posibles en grupos de 3x3 (bomba III).
+ *
+ * @param resultado
+ *		Vector que almacena la matriz que va a ser cambiada.
+ *
+ * @param dimens
+ *		Dimensiones de la matriz.
+ */
+__global__ void girar_matriz (int *resultado, Dim dimens)
+{
+	int fila = blockIdx.y * blockDim.y + threadIdx.y,
+	    columna = blockIdx.x * blockDim.x + threadIdx.x,
+	    posY = fila - 1,
+	    posX = columna - 1,
+	    aux;
+
+	if ((fila >= dimens.filas)
+		|| (columna >= dimens.columnas))
+	{
+		return;
+	}
+
+	if (comprobar_giro (fila, columna, dimens))
+	{
+		/* Se realizan los intercambios de manera manual */
+		aux = resultado [(posY * dimens.columnas) + posX];
+		/* ---- */
+		resultado [(posY * dimens.columnas) + posX]
+			= resultado [( (posY + 1) * dimens.columnas) + posX];
+
+		resultado [( (posY + 1) * dimens.columnas) + posX]
+			= resultado [( (posY + 2) * dimens.columnas) + posX];
+
+		resultado [( (posY + 2) * dimens.columnas) + posX]
+			= resultado [( (posY + 2) * dimens.columnas) + posX + 1];
+
+		/* ---- */
+		resultado [( (posY + 2) * dimens.columnas) + posX + 1]
+			= resultado [( (posY + 2) * dimens.columnas) + posX + 2];
+
+		resultado [( (posY + 2) * dimens.columnas) + posX + 2]
+			= resultado [( (posY + 1) * dimens.columnas) + posX + 2];
+
+		resultado [( (posY + 1) * dimens.columnas) + posX + 2]
+			= resultado [(posY * dimens.columnas) + posX + 2];
+
+		/* ---- */
+		resultado [(posY * dimens.columnas) + posX + 2]
+			= resultado [(posY * dimens.columnas) + posX + 1];
+
+		resultado [(posY * dimens.columnas) + posX + 1] = aux;
+	}
+
 }
 
 /* -------------------- */
@@ -511,6 +619,74 @@ int bomba_columna (int col_bomba, Malla *malla)
 	KERNEL (err, eliminar_columna,
 		bloques, hilos,
 		time (NULL), matriz_d, 1, max, malla->dimens, col_bomba
+	);
+
+	/* Copia la información de vuelta y libera la memoria en el dispositivo */
+	CUDA (err,
+		cudaMemcpy (aux, matriz_d, tam * sizeof aux [0], cudaMemcpyDeviceToHost)
+	);
+
+	/* Copiar directamente un array de Diamante desde el dispositivo da problemas,
+	así que se usa un array de enteros para crear los números aleatorios en
+	paralelo y luego la CPU se encarga de crear los elementos de tipo Diamante */
+	copiar_matriz (aux, malla);
+
+	CUDA (err,
+		cudaFree (matriz_d)
+	);
+
+	return SUCCESS;
+}
+
+/**
+ * Función para ejecutar la bomba III (girar en grupos de 3x3).
+ *
+ * @param malla
+ *		Estructura con toda la información del juego (matriz, nivel
+ *	y dimensiones).
+ */
+int bomba_giro (Malla *malla)
+{
+	cudaError_t err;
+	dim3 bloques,
+	     hilos;
+
+	int tam = malla->dimens.filas * malla->dimens.columnas,
+	    i,
+	    j,
+	    idx = 0,
+	    max = max_nv (*malla);
+
+	int *matriz_d,
+	    *aux = (int *) malloc (tam * sizeof aux [0]);
+
+	/* Inicializa la matriz auxiliar */
+	for (i = 0; i < malla->dimens.filas; i++)
+	{
+		for (j = 0; j < malla->dimens.columnas; j++)
+		{
+			idx = (i * malla->dimens.columnas) + j;
+			aux [idx] = malla->matriz [idx].id;
+		}
+	}
+
+	/* Reserva memoria en el dispositivo y copia la matriz */
+	CUDA (err,
+		cudaMalloc ((void **) &matriz_d,
+				tam * sizeof matriz_d [0])
+	);
+
+	CUDA (err,
+		cudaMemcpy (matriz_d, aux, tam * sizeof matriz_d [0],
+				cudaMemcpyHostToDevice)
+	);
+
+	/* Llama al núcleo para eliminar la fila */
+	obtener_dim (&bloques, &hilos, malla->dimens);
+
+	KERNEL (err, girar_matriz,
+		bloques, hilos,
+		matriz_d, malla->dimens
 	);
 
 	/* Copia la información de vuelta y libera la memoria en el dispositivo */

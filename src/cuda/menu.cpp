@@ -149,7 +149,8 @@ void bomba (Malla malla)
 			break;
 
 		case 3: 
-			recorrer_malla_giro (malla);
+			/* Llama a la función que utiliza CUDA */
+			bomba_giro (&malla);
 			break;
 	}
 }

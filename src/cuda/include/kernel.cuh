@@ -44,6 +44,29 @@
 	}
 
 
+/* --------------------------------------- */
+/* DECLARACIÓN DE FUNCIONES DE DISPOSITIVO */
+/* --------------------------------------- */
+
+/**
+ * Comprueba si es posible realizar un giro de 3x3 en la posición dada.
+ *
+ * @param posY
+ * 		Coordenada Y del eje a comprobar.
+ *
+ * @param posX
+ * 		Coordenada X del eje a comprobar.
+ *
+ * @param dimens
+ * 		Dimensiones de la matriz a comprobar.
+ * 
+ *
+ * @return
+ *		true si es posible.
+ *		false si no lo es.
+ */
+__device__ bool comprobar_giro (int posY, int posX, Dim dimens);
+
 /* ---------------------- */
 /* DECLARACIÓN DE NÚCLEOS */
 /* ---------------------- */
@@ -126,6 +149,16 @@ __global__ void eliminar_columna (unsigned long semilla,
 				  const int max,
 				  const Dim dimens,
 				  int col_bomba);
+/**
+ * Gira todos los elementos posibles en grupos de 3x3 (bomba III).
+ *
+ * @param resultado
+ *		Vector que almacena la matriz que va a ser cambiada.
+ *
+ * @param dimens
+ * 		Dimensiones de la matriz.
+ */
+__global__ void girar_matriz (int *resultado, Dim dimens);
 
 /* ----------------------------------- */
 /* DECLARACIÓN DE FUNCIONES AUXILIARES */
@@ -205,5 +238,13 @@ int bomba_fila (int fila_bomba, Malla *malla);
  */
 int bomba_columna (int col_bomba, Malla *malla);
 
+/**
+ * Función para ejecutar la bomba III (girar en grupos de 3x3).
+ *
+ * @param malla
+ *		Estructura con toda la información del juego (matriz, nivel
+ *	y dimensiones).
+ */
+int bomba_giro (Malla *malla);
 
 #endif
