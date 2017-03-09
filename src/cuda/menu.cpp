@@ -144,8 +144,8 @@ void bomba (Malla malla)
 				  (malla.dimens.columnas - 1));
 
 			columna = pedir_opcion (0, (malla.dimens.columnas - 1));
-
-			eliminar_columna (columna, malla);
+			/* Llama a la función que utiliza CUDA */
+			bomba_columna (columna, &malla);
 			break;
 
 		case 3: 

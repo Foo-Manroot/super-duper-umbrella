@@ -74,7 +74,7 @@ __global__ void generar_aleat (unsigned long semilla,
  *
  * @param dimens
  *		Dimensiones de la matriz resultado.
-
+ *
  *
  * @param fila_bomb
  *		Fila a eliminar.
@@ -126,6 +126,74 @@ __global__ void eliminar_fila (unsigned long semilla,
 
 }
 
+/**
+ * Mueve todos los elementos a la izquierda de fila_bomba hacia su derecha. Cuando llega
+ * al primer elemento, genera un nuevo elemento.
+ *
+ * @param semilla
+ *		Elemento inicial para generar la secuencia.
+ *
+ * @param resultado
+ *		Vector en el que se almacenarán los números generados.
+ *
+ * @param min
+ *		Límite inferior para generar un número (inclusivo).
+ *
+ * @param max
+ *		Límite superior para generar un número (inclusivo).
+ *
+ * @param dimens
+ *		Dimensiones de la matriz resultado.
+ *
+ *
+ * @param fila_bomb
+ *		Fila a eliminar.
+ */
+__global__ void eliminar_columna (unsigned long semilla,
+				  int *resultado,
+				  const int min,
+				  const int max,
+				  const Dim dimens,
+				  int col_bomba)
+{
+	int fila = blockIdx.y * blockDim.y + threadIdx.y,
+	    columna = blockIdx.x * blockDim.x + threadIdx.x,
+	    i,
+	    rand_int;
+
+	curandState estado;
+
+	float rand_f;
+
+	if ((fila >= dimens.filas)
+		|| (columna != col_bomba))
+	{
+		return;
+	}
+
+	/* Intercambia los elementos desde la fila actual hasta el principio */
+	for (i = col_bomba; i > 0; i--)
+	{
+		resultado [(fila * dimens.columnas) + i]
+			= resultado [(fila * dimens.columnas ) + i - 1];
+	}
+
+	/* Genera el último elemento */
+	curand_init (semilla, fila, 0, &estado);
+	/* El número se genera primero con coma flotante (ajustando los
+	límites como se haya especificado) y luego se convierte a entero.
+	Esto es más rápido que realizar la operación de módulo */
+	rand_f = curand_uniform (&estado);
+
+	rand_f *= (max - min + 0.999999);
+	rand_f += min;
+
+	/* Convierte el float a entero */
+	rand_int = __float2int_rz (rand_f);
+
+	/* Guarda el resultado */
+	resultado [fila * dimens.columnas] = rand_int;
+}
 
 /* -------------------- */
 /* FUNCIONES AUXILIARES */
@@ -335,7 +403,7 @@ int bomba_fila (int fila_bomba, Malla *malla)
 	dim_matr_hilos.filas = 1;
 	dim_matr_hilos.columnas = malla->dimens.columnas;
 
-	/* Inicialoza la matriz auxiliar */
+	/* Inicializa la matriz auxiliar */
 	for (i = 0; i < malla->dimens.filas; i++)
 	{
 		for (j = 0; j < malla->dimens.columnas; j++)
@@ -362,6 +430,87 @@ int bomba_fila (int fila_bomba, Malla *malla)
 	KERNEL (err, eliminar_fila,
 		bloques, hilos,
 		time (NULL), matriz_d, 1, max, malla->dimens, fila_bomba
+	);
+
+	/* Copia la información de vuelta y libera la memoria en el dispositivo */
+	CUDA (err,
+		cudaMemcpy (aux, matriz_d, tam * sizeof aux [0], cudaMemcpyDeviceToHost)
+	);
+
+	/* Copiar directamente un array de Diamante desde el dispositivo da problemas,
+	así que se usa un array de enteros para crear los números aleatorios en
+	paralelo y luego la CPU se encarga de crear los elementos de tipo Diamante */
+	copiar_matriz (aux, malla);
+
+	CUDA (err,
+		cudaFree (matriz_d)
+	);
+
+	return SUCCESS;
+}
+
+/**
+ * Función para ejecutar la bomba II (eliminar columna).
+ *
+ * @param col_bomba
+ *		Columna que se debe eliminar (poner a DIAMANTE_VACIO).
+ *
+ * @param malla
+ *		Estructura con la información del juego.
+ *
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		CUDA_ERR si hubo algún error relacionado con CUDA.
+ */
+int bomba_columna (int col_bomba, Malla *malla)
+{
+	cudaError_t err;
+	dim3 bloques,
+	     hilos;
+
+	int tam = malla->dimens.filas * malla->dimens.columnas,
+	    i,
+	    j,
+	    idx = 0,
+	    max = max_nv (*malla);
+
+	int *matriz_d,
+	    *aux = (int *) malloc (tam * sizeof aux [0]);
+
+	/* Dimensiones para luego crear un hilo por columna */
+	Dim dim_matr_hilos;
+
+	dim_matr_hilos.filas = malla->dimens.filas;
+	dim_matr_hilos.columnas = 1;
+
+	/* Inicializa la matriz auxiliar */
+	for (i = 0; i < malla->dimens.filas; i++)
+	{
+		for (j = 0; j < malla->dimens.columnas; j++)
+		{
+			idx = (i * malla->dimens.columnas) + j;
+			aux [idx] = malla->matriz [idx].id;
+		}
+	}
+
+	/* Reserva memoria en el dispositivo y copia la matriz */
+	CUDA (err,
+		cudaMalloc ((void **) &matriz_d,
+				tam * sizeof matriz_d [0])
+	);
+
+	CUDA (err,
+		cudaMemcpy (matriz_d, aux, tam * sizeof matriz_d [0],
+				cudaMemcpyHostToDevice)
+	);
+
+	/* Llama al núcleo para eliminar la fila */
+	obtener_dim (&bloques, &hilos, dim_matr_hilos);
+
+	KERNEL (err, eliminar_columna,
+		bloques, hilos,
+		time (NULL), matriz_d, 1, max, malla->dimens, col_bomba
 	);
 
 	/* Copia la información de vuelta y libera la memoria en el dispositivo */
