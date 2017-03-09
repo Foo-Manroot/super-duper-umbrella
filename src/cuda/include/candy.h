@@ -5,6 +5,8 @@
 #include "libutils.h"
 #include "kernel.cuh"
 
+#include <sys/time.h>
+
 /**
  * Movimientos de diamantes posibles
  */
