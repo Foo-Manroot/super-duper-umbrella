@@ -26,15 +26,7 @@ void reordenar_tablero (int posY,int posX,Malla malla);
 void recorrer_malla_huecos (Malla malla);
 
 void tratar_huecos(int posY, int posX, Malla malla);
-void recorrer_malla_coincidencias (Malla malla);
 
-void tratar_coincidencias(int posY, int posX, Malla malla);
-void eliminar_coincidencias_eje(int posY, int posX,int eje,Malla malla);
-
-void eliminar_coincidencias(int posY,int posX,int sen,Malla malla);
-int buscar_coincidencias(int posY, int posX, int sen,Malla malla);
-
-int son_iguales(Diamante d1,Diamante d2);
 void mover_diamante(int posY, int posX, int mov, Malla malla);
 
 int es_valido(int posY, int posX, int mov, Malla malla);

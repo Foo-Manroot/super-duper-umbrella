@@ -57,8 +57,12 @@ void menu (Malla malla)
 			default:
 				imprimir (DETALLE_LOG, "Opción no reconocida.\n");
 		}
-		recorrer_malla_coincidencias (malla);
-		recorrer_malla_huecos (malla);
+
+		if (!fin)
+		{
+			eliminar_coincidencias (&malla);
+			recorrer_malla_huecos (malla);
+		}
 	}
 }
 
@@ -103,7 +107,6 @@ void mover (Malla malla)
 
 	/* Realiza el movimiento y comprueba si hay elementos alineados */
 	mover_diamante (posY, posX, mov, malla);
-	recorrer_malla_coincidencias (malla);
 }
 
 

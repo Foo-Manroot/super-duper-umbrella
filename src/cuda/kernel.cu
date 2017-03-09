@@ -72,11 +72,11 @@ __device__ bool comprobar_giro (int posY, int posX, Dim dimens)
  * @param dimens
  *		Dimensiones de la matriz resultado.
  */
-__global__ void generar_aleat (unsigned long semilla,
-			       int *resultado,
-			       const int min,
-			       const int max,
-			       const Dim dimens)
+__global__ void gen_aleat_cuda (unsigned long semilla,
+			        int *resultado,
+			        const int min,
+			        const int max,
+			        const Dim dimens)
 {
 	int rand_int,
 	    fila = blockIdx.y * blockDim.y + threadIdx.y,
@@ -130,12 +130,12 @@ __global__ void generar_aleat (unsigned long semilla,
  * @param fila_bomb
  *		Fila a eliminar.
  */
-__global__ void eliminar_fila (unsigned long semilla,
-			       int *resultado,
-			       const int min,
-			       const int max,
-			       const Dim dimens,
-			       int fila_bomba)
+__global__ void eliminar_fila_cuda (unsigned long semilla,
+				    int *resultado,
+				    const int min,
+				    const int max,
+				    const Dim dimens,
+				    int fila_bomba)
 {
 	int fila = blockIdx.y * blockDim.y + threadIdx.y,
 	    columna = blockIdx.x * blockDim.x + threadIdx.x,
@@ -201,12 +201,12 @@ __global__ void eliminar_fila (unsigned long semilla,
  * @param fila_bomb
  *		Fila a eliminar.
  */
-__global__ void eliminar_columna (unsigned long semilla,
-				  int *resultado,
-				  const int min,
-				  const int max,
-				  const Dim dimens,
-				  int col_bomba)
+__global__ void eliminar_columna_cuda (unsigned long semilla,
+				       int *resultado,
+				       const int min,
+				       const int max,
+				       const Dim dimens,
+				       int col_bomba)
 {
 	int fila = blockIdx.y * blockDim.y + threadIdx.y,
 	    columna = blockIdx.x * blockDim.x + threadIdx.x,
@@ -256,7 +256,8 @@ __global__ void eliminar_columna (unsigned long semilla,
  * @param dimens
  *		Dimensiones de la matriz.
  */
-__global__ void girar_matriz (int *resultado, Dim dimens)
+__global__ void girar_matriz_cuda (int *resultado,
+				   Dim dimens)
 {
 	int fila = blockIdx.y * blockDim.y + threadIdx.y,
 	    columna = blockIdx.x * blockDim.x + threadIdx.x,
@@ -300,7 +301,116 @@ __global__ void girar_matriz (int *resultado, Dim dimens)
 
 		resultado [(posY * dimens.columnas) + posX + 1] = aux;
 	}
+}
 
+/**
+ * Comprueba si la fila contiene elementos repetidos.
+ *
+ * @param matriz
+ *		Matriz con los valores actuales de los diamantes.
+ *
+ * @param dimens
+ *		Estructura con las dimensiones de la matriz.
+ *
+ * @param coincidencias
+ *		Matriz en la que se va a indicar si había alguna coincidencia.
+ */
+__global__ void busar_coinc_cuda_fila (int *matriz,
+				       Dim dimens,
+				       int *coincidencias)
+{
+	int fila = blockIdx.y * blockDim.y + threadIdx.y,
+	    i,
+	    aux = fila * dimens.columnas;
+
+	if (fila >= dimens.filas)
+	{
+		return;
+	}
+
+	/* Recorre la matriz marcando los elementos iguales consecutivos */
+	for (i = 0; i < (dimens.columnas - 2) ; i++)
+	{
+		if ( (matriz [aux + i] == matriz [aux + i + 1])
+			&& (matriz [aux + i] == matriz [aux + i + 2]) )
+		{
+			coincidencias [aux + i] = COINCIDE;
+			coincidencias [aux + i + 1] = COINCIDE;
+			coincidencias [aux + i + 2] = COINCIDE;
+		}
+	}
+}
+
+/**
+ * Comprueba si la columna contiene elementos repetidos.
+ *
+ * @param matriz
+ *		Matriz con los valores actuales de los diamantes.
+ *
+ * @param dimens
+ *		Estructura con las dimensiones de la matriz.
+ *
+ * @param coincidencias
+ *		Matriz en la que se va a indicar si había alguna coincidencia.
+ */
+__global__ void busar_coinc_cuda_col (int *matriz,
+				      Dim dimens,
+				      int *coincidencias)
+{
+	int columna = blockIdx.x * blockDim.x + threadIdx.x,
+	    i;
+
+	if (columna >= dimens.columnas)
+	{
+		return;
+	}
+
+	/* Recorre la matriz marcando los elementos iguales consecutivos */
+	for (i = 0; i < (dimens.filas - 2) ; i++)
+	{
+		if ( (matriz [(i * dimens.columnas) + columna]
+			== matriz [( (i + 1) * dimens.columnas) + columna])
+			&& (matriz [(i * dimens.columnas) + columna]
+				== matriz [( (i + 2) * dimens.columnas) + columna]) )
+		{
+			coincidencias [(i * dimens.columnas) + columna] = COINCIDE;
+			coincidencias [(i + 1) * dimens.columnas + columna] = COINCIDE;
+			coincidencias [(i + 2) * dimens.columnas + columna] = COINCIDE;
+		}
+	}
+}
+
+
+/**
+ * Elimina todos los elementos que se haya visto que han coincidido.
+ *
+ *
+ * @param matriz
+ *		Matriz con los valores actuales de los diamantes.
+ *
+ * @param dimens
+ *		Estructura con las dimensiones de la matriz.
+ *
+ * @param coincidencias
+ *		Matriz con las coincidencias encontradas.
+ */
+__global__ void eliminar_coinc_cuda (int *matriz,
+				     Dim dimens,
+				     int *coincidencias)
+{
+	int fila = blockIdx.y * blockDim.y + threadIdx.y,
+	    columna = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if ( (fila >= dimens.filas)
+		|| (columna >= dimens.filas))
+	{
+		return;
+	}
+
+	if (coincidencias [(fila * dimens.filas) + columna] == COINCIDE)
+	{
+		matriz [(fila * dimens.filas) + columna] = DIAMANTE_VACIO;
+	}
 }
 
 /* -------------------- */
@@ -453,7 +563,7 @@ int matriz_aleat (Malla *malla)
 	obtener_dim (&bloques, &hilos, malla->dimens);
 
 	/* Genera los números aleatorios y los copia en la matriz */
-	KERNEL (err, generar_aleat,
+	KERNEL (err, gen_aleat_cuda,
 		bloques, hilos,
 		time (NULL), matriz_d, 1, max, malla->dimens
 	);
@@ -488,7 +598,10 @@ int matriz_aleat (Malla *malla)
  *
  * @return
  *		SUCCESS si todo ha salido correctamente.
- *		CUDA_ERR si hubo algún error relacionado con CUDA.
+ *		ERR_CUDA si hubo algún error al obtener las características del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
  */
 int bomba_fila (int fila_bomba, Malla *malla)
 {
@@ -535,7 +648,7 @@ int bomba_fila (int fila_bomba, Malla *malla)
 	/* Llama al núcleo para eliminar la fila */
 	obtener_dim (&bloques, &hilos, dim_matr_hilos);
 
-	KERNEL (err, eliminar_fila,
+	KERNEL (err, eliminar_fila_cuda,
 		bloques, hilos,
 		time (NULL), matriz_d, 1, max, malla->dimens, fila_bomba
 	);
@@ -569,7 +682,10 @@ int bomba_fila (int fila_bomba, Malla *malla)
  *
  * @return
  *		SUCCESS si todo ha salido correctamente.
- *		CUDA_ERR si hubo algún error relacionado con CUDA.
+ *		ERR_CUDA si hubo algún error al obtener las características del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
  */
 int bomba_columna (int col_bomba, Malla *malla)
 {
@@ -613,10 +729,10 @@ int bomba_columna (int col_bomba, Malla *malla)
 				cudaMemcpyHostToDevice)
 	);
 
-	/* Llama al núcleo para eliminar la fila */
+	/* Llama al núcleo para eliminar la columna */
 	obtener_dim (&bloques, &hilos, dim_matr_hilos);
 
-	KERNEL (err, eliminar_columna,
+	KERNEL (err, eliminar_columna_cuda,
 		bloques, hilos,
 		time (NULL), matriz_d, 1, max, malla->dimens, col_bomba
 	);
@@ -644,6 +760,14 @@ int bomba_columna (int col_bomba, Malla *malla)
  * @param malla
  *		Estructura con toda la información del juego (matriz, nivel
  *	y dimensiones).
+ *
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		ERR_CUDA si hubo algún error al obtener las características del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
  */
 int bomba_giro (Malla *malla)
 {
@@ -681,10 +805,10 @@ int bomba_giro (Malla *malla)
 				cudaMemcpyHostToDevice)
 	);
 
-	/* Llama al núcleo para eliminar la fila */
+	/* Llama al núcleo para girar la matriz */
 	obtener_dim (&bloques, &hilos, malla->dimens);
 
-	KERNEL (err, girar_matriz,
+	KERNEL (err, girar_matriz_cuda,
 		bloques, hilos,
 		matriz_d, malla->dimens
 	);
@@ -701,6 +825,116 @@ int bomba_giro (Malla *malla)
 
 	CUDA (err,
 		cudaFree (matriz_d)
+	);
+
+	return SUCCESS;
+}
+
+
+/**
+ * Busca coincidencias en la matriz y marca las casillas para ser eliminadas (las deja
+ * como DIAMANTE_VACIO.
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		ERR_CUDA si hubo algún error al obtener las características del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
+ */
+int eliminar_coincidencias (Malla *malla)
+{
+	cudaError_t err;
+	dim3 bloques,
+	     hilos;
+
+	int tam = malla->dimens.filas * malla->dimens.columnas,
+	    i,
+	    j,
+	    idx = 0,
+	    max = max_nv (*malla);
+
+	int *matriz_d,
+	    *coincidencias_d,
+	    *aux = (int *) malloc (tam * sizeof aux [0]);
+
+	/* Dimensiones para luego crear un hilo por columna */
+	Dim dim_matr_hilos;
+
+	dim_matr_hilos.filas = malla->dimens.filas;
+	dim_matr_hilos.columnas = 1;
+
+	/* Inicializa la matriz auxiliar */
+	for (i = 0; i < malla->dimens.filas; i++)
+	{
+		for (j = 0; j < malla->dimens.columnas; j++)
+		{
+			idx = (i * malla->dimens.columnas) + j;
+			aux [idx] = malla->matriz [idx].id;
+		}
+	}
+
+	/* Reserva memoria en el dispositivo y copia la matriz */
+	CUDA (err,
+		cudaMalloc ((void **) &matriz_d,
+				tam * sizeof matriz_d [0])
+	);
+
+	CUDA (err,
+		cudaMalloc ((void **) &coincidencias_d,
+				tam * sizeof coincidencias_d [0])
+	);
+
+	CUDA (err,
+		cudaMemset (coincidencias_d, NO_COINCIDE,
+				tam * sizeof coincidencias_d [0])
+	);
+
+	CUDA (err,
+		cudaMemcpy (matriz_d, aux, tam * sizeof matriz_d [0],
+				cudaMemcpyHostToDevice)
+	);
+
+	/* Llama al núcleo para comprobar la matriz */
+	obtener_dim (&bloques, &hilos, dim_matr_hilos);
+
+	KERNEL (err, busar_coinc_cuda_fila,
+		bloques, hilos,
+		matriz_d, malla->dimens, coincidencias_d
+	);
+
+	dim_matr_hilos.filas = 1;
+	dim_matr_hilos.columnas = malla->dimens.columnas;
+	obtener_dim (&bloques, &hilos, dim_matr_hilos);
+
+	KERNEL (err, busar_coinc_cuda_col,
+		bloques, hilos,
+		matriz_d, malla->dimens, coincidencias_d
+	);
+
+	/* Utiliza la matriz con los elementos marcados para eliminarlos */
+	obtener_dim (&bloques, &hilos, malla->dimens);
+	KERNEL (err, eliminar_coinc_cuda,
+		bloques, hilos,
+		matriz_d, malla->dimens, coincidencias_d
+	);
+
+	/* Copia la información de vuelta y libera la memoria en el dispositivo */
+	CUDA (err,
+		cudaMemcpy (aux, matriz_d, tam * sizeof aux [0], cudaMemcpyDeviceToHost)
+	);
+
+	/* Copiar directamente un array de Diamante desde el dispositivo da problemas,
+	así que se usa un array de enteros para crear los números aleatorios en
+	paralelo y luego la CPU se encarga de crear los elementos de tipo Diamante */
+	copiar_matriz (aux, malla);
+
+	CUDA (err,
+		cudaFree (matriz_d)
+	);
+
+	CUDA (err,
+		cudaFree (coincidencias_d)
 	);
 
 	return SUCCESS;

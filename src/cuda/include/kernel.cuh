@@ -10,6 +10,16 @@
 #include <math.h>
 
 /**
+ * Etiqueta para marcar elementos coincidentes en la matriz
+ */
+#define COINCIDE 1
+
+/**
+ * Etiqueta para marcar elementos que no coinciden en la matriz
+ */
+#define NO_COINCIDE 0
+
+/**
  * Realiza la llamada a la función CUDA y comprueba el valor devuelto. Si hay algún
  * error, devuelve (return) ERR_CUDA.
  */
@@ -86,10 +96,10 @@ __device__ bool comprobar_giro (int posY, int posX, Dim dimens);
  * @param max
  *		Límite superior para generar un número (inclusivo).
  */
-__global__ void generar_aleat (curandState *estado,
-			       int *resultado,
-			       int min,
-			       int max);
+__global__ void gen_aleat_cuda (curandState *estado,
+				int *resultado,
+				int min,
+				int max);
 /**
  * Mueve todos los elementos a la izquierda de fila_bomba hacia su derecha. Cuando llega
  * al primer elemento, genera un nuevo elemento.
@@ -113,12 +123,12 @@ __global__ void generar_aleat (curandState *estado,
  * @param fila_bomb
  *		Fila a eliminar.
  */
-__global__ void eliminar_fila (unsigned long semilla,
-			       int *resultado,
-			       const int min,
-			       const int max,
-			       const Dim dimens,
-			       int fila_bomba);
+__global__ void eliminar_fila_cuda (unsigned long semilla,
+				    int *resultado,
+				    const int min,
+				    const int max,
+				    const Dim dimens,
+				    int fila_bomba);
 
 /**
  * Mueve todos los elementos a la izquierda de fila_bomba hacia su derecha. Cuando llega
@@ -143,12 +153,12 @@ __global__ void eliminar_fila (unsigned long semilla,
  * @param fila_bomb
  *		Fila a eliminar.
  */
-__global__ void eliminar_columna (unsigned long semilla,
-				  int *resultado,
-				  const int min,
-				  const int max,
-				  const Dim dimens,
-				  int col_bomba);
+__global__ void eliminar_columna_cuda (unsigned long semilla,
+				       int *resultado,
+				       const int min,
+				       const int max,
+				       const Dim dimens,
+				       int col_bomba);
 /**
  * Gira todos los elementos posibles en grupos de 3x3 (bomba III).
  *
@@ -158,7 +168,57 @@ __global__ void eliminar_columna (unsigned long semilla,
  * @param dimens
  * 		Dimensiones de la matriz.
  */
-__global__ void girar_matriz (int *resultado, Dim dimens);
+__global__ void girar_matriz_cuda (int *resultado, Dim dimens);
+
+
+/**
+ * Comprueba si la fila contiene elementos repetidos.
+ *
+ * @param matriz
+ *		Matriz con los valores actuales de los diamantes.
+ *
+ * @param dimens
+ *		Estructura con las dimensiones de la matriz.
+ *
+ * @param coincidencias
+ *		Matriz en la que se va a indicar si había alguna coincidencia.
+ */
+__global__ void busar_coinc_cuda_fila (int *matriz,
+				       Dim dimens,
+				       int *coincidencias);
+/**
+ * Comprueba si la columna contiene elementos repetidos.
+ *
+ * @param matriz
+ *		Matriz con los valores actuales de los diamantes.
+ *
+ * @param dimens
+ *		Estructura con las dimensiones de la matriz.
+ *
+ * @param coincidencias
+ *		Matriz en la que se va a indicar si había alguna coincidencia.
+ */
+__global__ void busar_coinc_cuda_col (int *matriz,
+				       Dim dimens,
+				       int *coincidencias);
+
+/**
+ * Elimina todos los elementos que se haya visto que han coincidido.
+ *
+ *
+ * @param matriz
+ *		Matriz con los valores actuales de los diamantes.
+ *
+ * @param dimens
+ *		Estructura con las dimensiones de la matriz.
+ *
+ * @param coincidencias
+ *		Matriz con las coincidencias encontradas.
+ */
+__global__ void eliminar_coinc_cuda (int *matriz,
+				     Dim dimens,
+				     int *coincidencias);
+
 
 /* ----------------------------------- */
 /* DECLARACIÓN DE FUNCIONES AUXILIARES */
@@ -246,5 +306,18 @@ int bomba_columna (int col_bomba, Malla *malla);
  *	y dimensiones).
  */
 int bomba_giro (Malla *malla);
+
+/**
+ * Busca coincidencias en la matriz y marca las casillas para ser eliminadas (las deja
+ * como DIAMANTE_VACIO.
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		ERR_CUDA si hubo algún error al obtener las características del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
+ */
+int eliminar_coincidencias (Malla *malla);
 
 #endif
