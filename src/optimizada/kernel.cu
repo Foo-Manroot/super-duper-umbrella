@@ -606,6 +606,25 @@ int obtener_dim (dim3 *bloques, dim3 *hilos, Dim tam_matriz)
 		return ERR_TAM;
 	}
 
+	/* Limitación para la práctica. Si la matriz cabe en un bloque, se divide para
+	que ocupe 4 */
+	if ((tam_matriz.columnas * tam_matriz.filas) < propiedades.maxThreadsPerBlock)
+	{
+		hilos->x = ceil ( ((float) tam_matriz.columnas) / 2.0 );
+		hilos->y = ceil ( ((float) tam_matriz.filas) / 2.0 );
+
+		bloques->x = ceil (((float) tam_matriz.columnas) / ((float) hilos->x));
+		bloques->y = ceil (((float) tam_matriz.filas) / ((float) hilos->y));
+
+		imprimir (DETALLE_EXTRA, " --> Limitación artificial (para la"
+					" práctica): se usan %d x %d bloques de "
+					" %d x %d hilos. La matriz es de %d x %d "
+					" elementos.\n",
+					 bloques->x, bloques->y,
+					 hilos->x, hilos->y,
+					 tam_matriz.filas, tam_matriz.columnas);
+	}
+
 	return SUCCESS;
 }
 
