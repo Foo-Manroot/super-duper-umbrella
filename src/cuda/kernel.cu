@@ -321,29 +321,29 @@ __global__ void girar_matriz_cuda (int *resultado,
 		aux = resultado [(posY * dimens.columnas) + posX];
 		/* ---- */
 		resultado [(posY * dimens.columnas) + posX]
-			= resultado [( (posY + 1) * dimens.columnas) + posX];
-
-		resultado [( (posY + 1) * dimens.columnas) + posX]
 			= resultado [( (posY + 2) * dimens.columnas) + posX];
 
 		resultado [( (posY + 2) * dimens.columnas) + posX]
-			= resultado [( (posY + 2) * dimens.columnas) + posX + 1];
-
-		/* ---- */
-		resultado [( (posY + 2) * dimens.columnas) + posX + 1]
 			= resultado [( (posY + 2) * dimens.columnas) + posX + 2];
 
 		resultado [( (posY + 2) * dimens.columnas) + posX + 2]
-			= resultado [( (posY + 1) * dimens.columnas) + posX + 2];
-
-		resultado [( (posY + 1) * dimens.columnas) + posX + 2]
 			= resultado [(posY * dimens.columnas) + posX + 2];
 
-		/* ---- */
-		resultado [(posY * dimens.columnas) + posX + 2]
-			= resultado [(posY * dimens.columnas) + posX + 1];
+		resultado [(posY * dimens.columnas) + posX + 2] = aux;
 
-		resultado [(posY * dimens.columnas) + posX + 1] = aux;
+		/* ---- */
+		aux = resultado [(posY * dimens.columnas) + posX + 1];
+
+		resultado [(posY * dimens.columnas) + posX + 1]
+			= resultado [( (posY + 1) * dimens.columnas) + posX];
+
+		resultado [( (posY + 1) * dimens.columnas) + posX]
+			= resultado [( (posY + 2) * dimens.columnas) + posX + 1];
+
+		resultado [( (posY + 2) * dimens.columnas) + posX + 1]
+			= resultado [( (posY + 1) * dimens.columnas) + posX + 2];
+
+		resultado [( (posY + 1) * dimens.columnas) + posX + 2] = aux;
 	}
 }
 
@@ -506,7 +506,7 @@ __global__ void llenar_vacios_cuda (unsigned long semilla,
 
 			if (elem == -1)
 			{
-				curand_init (semilla, i * columna, 0, &estado);
+				curand_init (semilla, i + columna, 0, &estado);
 				/* El número se genera primero con coma flotante
 				(ajustando los límites como se haya especificado) y
 				luego se convierte a entero. Esto es más rápido que
