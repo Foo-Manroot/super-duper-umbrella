@@ -496,3 +496,12 @@ int max_nv (Malla malla)
 			return DIAMANTE_MAX;
 	}
 }
+
+
+/**
+ * Obtiene el nivel de detalle actual.
+ */
+int ver_nv_detalle ()
+{
+	return nivel_detalle;
+}

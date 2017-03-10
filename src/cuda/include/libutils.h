@@ -215,4 +215,9 @@ void imprimir (int detalle, const char *cadena, ...);
  */
 int max_nv (Malla malla);
 
+/**
+ * Obtiene el nivel de detalle actual.
+ */
+int ver_nv_detalle ();
+
 #endif

@@ -77,6 +77,29 @@
  */
 __device__ bool comprobar_giro (int posY, int posX, Dim dimens);
 
+/**
+ * Busca el primer elemento no vacío por encima de la posición especificada.
+ * Además, este elemento se convierte a DIAMANTE_VACIO.
+ *
+ * @param matriz
+ *		Matriz en la que se ha de buscar el elemento.
+ *
+ * @param fila_ini
+ *		Fila del primer elemento a comprobar.
+ *
+ * @param columna
+ *		Columna a comprobar.
+ *
+ * @param dimens
+ *		Dimensiones de la matriz.
+ *
+ *
+ * @return
+ *		El primer elemento encontrado, si había alguno.
+ *		-1 si no se encontró ningún elemento no vacío.
+ */
+__device__ int buscar_lleno (int *matriz, int fila_ini, int columna, Dim dimens);
+
 /* ---------------------- */
 /* DECLARACIÓN DE NÚCLEOS */
 /* ---------------------- */
@@ -186,6 +209,7 @@ __global__ void girar_matriz_cuda (int *resultado, Dim dimens);
 __global__ void busar_coinc_cuda_fila (int *matriz,
 				       Dim dimens,
 				       int *coincidencias);
+
 /**
  * Comprueba si la columna contiene elementos repetidos.
  *
@@ -319,5 +343,17 @@ int bomba_giro (Malla *malla);
  *	dispositivo.
  */
 int eliminar_coincidencias (Malla *malla);
+
+/**
+ * Rellena los diamantes vacíos en la matriz.
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		ERR_CUDA si hubo algún error al obtener las características del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
+ */
+int llenar_vacios (Malla *malla);
 
 #endif

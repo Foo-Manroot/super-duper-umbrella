@@ -61,7 +61,15 @@ void menu (Malla malla)
 		if (!fin)
 		{
 			eliminar_coincidencias (&malla);
-			recorrer_malla_huecos (malla);
+
+			imprimir (DETALLE_DEBUG, "Estado de la matriz tras eliminar"
+						 " coincidencias: \n");
+			if (ver_nv_detalle () >= DETALLE_DEBUG)
+			{
+				mostrar_malla (malla);
+			}
+
+			llenar_vacios (&malla);
 		}
 	}
 }

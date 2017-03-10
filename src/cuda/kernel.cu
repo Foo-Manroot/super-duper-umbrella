@@ -50,6 +50,50 @@ __device__ bool comprobar_giro (int posY, int posX, Dim dimens)
 
 }
 
+/**
+ * Busca el primer elemento no vacío por encima de la posición especificada.
+ * Además, este elemento se convierte a DIAMANTE_VACIO.
+ *
+ * @param matriz
+ *		Matriz en la que se ha de buscar el elemento.
+ *
+ * @param fila_ini
+ *		Fila del primer elemento a comprobar.
+ *
+ * @param columna
+ *		Columna a comprobar.
+ *
+ * @param dimens
+ *		Dimensiones de la matriz.
+ *
+ *
+ * @return
+ *		El primer elemento encontrado, si había alguno.
+ *		-1 si no se encontró ningún elemento no vacío.
+ */
+__device__ int buscar_lleno (int *matriz, int fila_ini, int columna, Dim dimens)
+{
+	int elem = -1,
+	    fila = fila_ini,
+	    aux;
+
+	while ( (elem == -1)
+		&& (fila > 0))
+	{
+		aux = (fila * dimens.columnas) + columna;
+
+		if (matriz [aux] != DIAMANTE_VACIO)
+		{
+			elem = matriz [aux];
+			matriz [aux] = DIAMANTE_VACIO;
+		}
+
+		fila--;
+	}
+
+	return elem;
+}
+
 /* ------- */
 /* NÚCLEOS */
 /* ------- */
@@ -402,14 +446,85 @@ __global__ void eliminar_coinc_cuda (int *matriz,
 	    columna = blockIdx.x * blockDim.x + threadIdx.x;
 
 	if ( (fila >= dimens.filas)
-		|| (columna >= dimens.filas))
+		|| (columna >= dimens.columnas))
 	{
 		return;
 	}
 
-	if (coincidencias [(fila * dimens.filas) + columna] == COINCIDE)
+	if (coincidencias [(fila * dimens.columnas) + columna] == COINCIDE)
 	{
-		matriz [(fila * dimens.filas) + columna] = DIAMANTE_VACIO;
+		matriz [(fila * dimens.columnas) + columna] = DIAMANTE_VACIO;
+	}
+}
+
+/**
+ * Comprueba todos los huecos de la columna y rellena los vacíos.
+ *
+ * @param semilla
+ *		Elemento inicial para generar la secuencia.
+ *
+ * @param resultado
+ *		Vector en el que se almacenarán los números generados.
+ *
+ * @param min
+ *		Límite inferior para generar un número (inclusivo).
+ *
+ * @param max
+ *		Límite superior para generar un número (inclusivo).
+ *
+ * @param dimens
+ *		Dimensiones de la matriz resultado.
+ */
+__global__ void llenar_vacios_cuda (unsigned long semilla,
+				    int *resultado,
+				    const int min,
+				    const int max,
+				    const Dim dimens)
+{
+	int columna = blockIdx.x * blockDim.x + threadIdx.x,
+	    i,
+	    elem,
+	    rand_int;
+
+	curandState estado;
+	float rand_f;
+
+	if (columna >= dimens.columnas)
+	{
+		return;
+	}
+
+	/* Recorre la columna hasta encontrar un elemento vacío */
+	for (i = dimens.filas; i >= 0; i--)
+	{
+		elem = resultado [(i * dimens.columnas) + columna];
+
+		if (elem == DIAMANTE_VACIO)
+		{
+			/* Busca el primer elemento que haya por encima y lo baja */
+			elem = buscar_lleno (resultado, i, columna, dimens);
+
+			if (elem == -1)
+			{
+				curand_init (semilla, i * columna, 0, &estado);
+				/* El número se genera primero con coma flotante
+				(ajustando los límites como se haya especificado) y
+				luego se convierte a entero. Esto es más rápido que
+				realizar la operación de módulo */
+				rand_f = curand_uniform (&estado);
+
+				rand_f *= (max - min + 0.999999);
+				rand_f += min;
+
+				/* Convierte el float a entero */
+				rand_int = __float2int_rz (rand_f);
+
+				/* Guarda el resultado */
+				elem = rand_int;
+			}
+
+			resultado [(i * dimens.columnas) + columna] = elem;
+		}
 	}
 }
 
@@ -460,7 +575,7 @@ int obtener_dim (dim3 *bloques, dim3 *hilos, Dim tam_matriz)
 		cudaGetDeviceProperties (&propiedades, id_dispos)
 	);
 
-	imprimir (DETALLE_DEBUG, "\n -> Escogido dispositivo %d, con versión %d.%d\n\n",
+	imprimir (DETALLE_EXTRA, "\n -> Escogido dispositivo %d, con versión %d.%d\n\n",
 				id_dispos,
 				propiedades.major, propiedades.minor);
 
@@ -476,6 +591,11 @@ int obtener_dim (dim3 *bloques, dim3 *hilos, Dim tam_matriz)
 	bloques->x = ceil (((float) tam_matriz.columnas) / ((float) hilos->x));
 	bloques->y = ceil (((float) tam_matriz.filas) / ((float) hilos->y));
 	bloques->z = 1;
+
+	imprimir (DETALLE_EXTRA, "Se usan bloques de %d x %d para alojar los (%d x %d)"
+				 " hilos necesarios.\n",
+				hilos->x, hilos->y,
+				tam_matriz.columnas, tam_matriz.filas);
 
 	/* Si la matriz no cabe, se avisa */
 	if ((bloques->x > propiedades.maxGridSize [0])
@@ -778,8 +898,7 @@ int bomba_giro (Malla *malla)
 	int tam = malla->dimens.filas * malla->dimens.columnas,
 	    i,
 	    j,
-	    idx = 0,
-	    max = max_nv (*malla);
+	    idx = 0;
 
 	int *matriz_d,
 	    *aux = (int *) malloc (tam * sizeof aux [0]);
@@ -851,8 +970,7 @@ int eliminar_coincidencias (Malla *malla)
 	int tam = malla->dimens.filas * malla->dimens.columnas,
 	    i,
 	    j,
-	    idx = 0,
-	    max = max_nv (*malla);
+	    idx = 0;
 
 	int *matriz_d,
 	    *coincidencias_d,
@@ -935,6 +1053,84 @@ int eliminar_coincidencias (Malla *malla)
 
 	CUDA (err,
 		cudaFree (coincidencias_d)
+	);
+
+	return SUCCESS;
+}
+
+
+/**
+ * Rellena los diamantes vacíos en la matriz.
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		ERR_CUDA si hubo algún error al obtener las características del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
+ */
+int llenar_vacios (Malla *malla)
+{
+	cudaError_t err;
+	dim3 bloques,
+	     hilos;
+
+	int tam = malla->dimens.filas * malla->dimens.columnas,
+	    i,
+	    j,
+	    idx = 0,
+	    max = max_nv (*malla);
+
+	int *matriz_d,
+	    *aux = (int *) malloc (tam * sizeof aux [0]);
+
+	/* Dimensiones para luego crear un hilo por columna */
+	Dim dim_matr_hilos;
+
+	dim_matr_hilos.filas = 1;
+	dim_matr_hilos.columnas = malla->dimens.columnas;
+
+	/* Inicializa la matriz auxiliar */
+	for (i = 0; i < malla->dimens.filas; i++)
+	{
+		for (j = 0; j < malla->dimens.columnas; j++)
+		{
+			idx = (i * malla->dimens.columnas) + j;
+			aux [idx] = malla->matriz [idx].id;
+		}
+	}
+
+	/* Reserva memoria en el dispositivo y copia la matriz */
+	CUDA (err,
+		cudaMalloc ((void **) &matriz_d,
+				tam * sizeof matriz_d [0])
+	);
+
+	CUDA (err,
+		cudaMemcpy (matriz_d, aux, tam * sizeof matriz_d [0],
+				cudaMemcpyHostToDevice)
+	);
+
+	/* Llama al núcleo para comprobar la matriz */
+	obtener_dim (&bloques, &hilos, dim_matr_hilos);
+
+	KERNEL (err, llenar_vacios_cuda,
+		bloques, hilos,
+		time (NULL), matriz_d, 1, max, malla->dimens
+	);
+
+	/* Copia la información de vuelta y libera la memoria en el dispositivo */
+	CUDA (err,
+		cudaMemcpy (aux, matriz_d, tam * sizeof aux [0], cudaMemcpyDeviceToHost)
+	);
+
+	/* Copiar directamente un array de Diamante desde el dispositivo da problemas,
+	así que se usa un array de enteros para crear los números aleatorios en
+	paralelo y luego la CPU se encarga de crear los elementos de tipo Diamante */
+	copiar_matriz (aux, malla);
+
+	CUDA (err,
+		cudaFree (matriz_d)
 	);
 
 	return SUCCESS;
