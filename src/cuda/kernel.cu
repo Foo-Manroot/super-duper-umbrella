@@ -181,8 +181,7 @@ __global__ void eliminar_fila_cuda (unsigned long semilla,
 				    const Dim dimens,
 				    int fila_bomba)
 {
-	int fila = blockIdx.y * blockDim.y + threadIdx.y,
-	    columna = blockIdx.x * blockDim.x + threadIdx.x,
+	int columna = blockIdx.x * blockDim.x + threadIdx.x,
 	    i,
 	    rand_int;
 
@@ -190,8 +189,7 @@ __global__ void eliminar_fila_cuda (unsigned long semilla,
 
 	float rand_f;
 
-	if ((columna >= dimens.columnas)
-		|| (fila != fila_bomba))
+	if (columna >= dimens.columnas)
 	{
 		return;
 	}
@@ -253,7 +251,6 @@ __global__ void eliminar_columna_cuda (unsigned long semilla,
 				       int col_bomba)
 {
 	int fila = blockIdx.y * blockDim.y + threadIdx.y,
-	    columna = blockIdx.x * blockDim.x + threadIdx.x,
 	    i,
 	    rand_int;
 
@@ -261,8 +258,7 @@ __global__ void eliminar_columna_cuda (unsigned long semilla,
 
 	float rand_f;
 
-	if ((fila >= dimens.filas)
-		|| (columna != col_bomba))
+	if (fila >= dimens.filas)
 	{
 		return;
 	}
