@@ -1,0 +1,18 @@
+	En gen_aleat gen_aleat_cuda() no tiene sentido usar memoria compartida, pues
+sólo se accede a la matriz una vez (para escribir el valor generado).
+
+	En realidad no se optimiza nada usando memoria compartida, dado que los núcleos
+o bien no realizan suficientes lecturas o escrituras como para que compense el uso de
+memoria compartida, o directamente no usan la memoria global más que para escribir el
+resultado (como en gen_aleat_cuda). Sin embargo, somo se pide en la práctica, se ha
+implementado en los siguientes núcleos:
+	-> eliminar_fila_cuda
+	-> eliminar_columna_cuda
+	-> girar_matriz_cuda
+
+	El único sitio donde sí puede llevar alguna ventaja el uso de memoria
+compartida, debido al gran número de accesos, es buscar_lleno()
+
+
+	Además, se ha usado el desenrrollamiento en el bucle para copiar el cuadrante de
+3x3 en la memoria compartida, dentro del núcleo 'girar_matriz_cuda'

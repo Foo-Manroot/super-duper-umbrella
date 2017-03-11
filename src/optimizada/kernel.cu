@@ -338,6 +338,7 @@ __global__ void girar_matriz_cuda (int *resultado,
 	    posY = fila - 1,
 	    posX = columna - 1,
 	    aux;
+	extern __shared__ int matriz_comp [];
 
 	if ((fila >= dimens.filas)
 		|| (columna >= dimens.columnas))
@@ -347,33 +348,69 @@ __global__ void girar_matriz_cuda (int *resultado,
 
 	if (comprobar_giro (fila, columna, dimens))
 	{
+		/* Copia el cuadrante en la memoria compartida (desenrrollamiento de
+		un bucle 'for') */
+		aux = (posY * dimens.columnas) + posX;
+		matriz_comp [aux] = resultado [aux];
+		matriz_comp [aux + 1] = resultado [aux + 1];
+		matriz_comp [aux + 2] = resultado [aux + 2];
+
+		aux = ( (posY + 1) * dimens.columnas) + posX;
+		matriz_comp [aux] = resultado [aux];
+		matriz_comp [aux + 1] = resultado [aux + 1];
+		matriz_comp [aux + 2] = resultado [aux + 2];
+
+		aux = ( (posY + 2) * dimens.columnas) + posX;
+		matriz_comp [aux] = resultado [aux];
+		matriz_comp [aux + 1] = resultado [aux + 1];
+		matriz_comp [aux + 2] = resultado [aux + 2];
+		/* ---- A partir de aquí, se usa la memoria compartida ---- */
+
+
 		/* Se realizan los intercambios de manera manual */
-		aux = resultado [(posY * dimens.columnas) + posX];
+		aux = matriz_comp [(posY * dimens.columnas) + posX];
 		/* ---- */
-		resultado [(posY * dimens.columnas) + posX]
-			= resultado [( (posY + 2) * dimens.columnas) + posX];
+		matriz_comp [(posY * dimens.columnas) + posX]
+			= matriz_comp [( (posY + 2) * dimens.columnas) + posX];
 
-		resultado [( (posY + 2) * dimens.columnas) + posX]
-			= resultado [( (posY + 2) * dimens.columnas) + posX + 2];
+		matriz_comp [( (posY + 2) * dimens.columnas) + posX]
+			= matriz_comp [( (posY + 2) * dimens.columnas) + posX + 2];
 
-		resultado [( (posY + 2) * dimens.columnas) + posX + 2]
-			= resultado [(posY * dimens.columnas) + posX + 2];
+		matriz_comp [( (posY + 2) * dimens.columnas) + posX + 2]
+			= matriz_comp [(posY * dimens.columnas) + posX + 2];
 
-		resultado [(posY * dimens.columnas) + posX + 2] = aux;
+		matriz_comp [(posY * dimens.columnas) + posX + 2] = aux;
 
 		/* ---- */
-		aux = resultado [(posY * dimens.columnas) + posX + 1];
+		aux = matriz_comp [(posY * dimens.columnas) + posX + 1];
 
-		resultado [(posY * dimens.columnas) + posX + 1]
-			= resultado [( (posY + 1) * dimens.columnas) + posX];
+		matriz_comp [(posY * dimens.columnas) + posX + 1]
+			= matriz_comp [( (posY + 1) * dimens.columnas) + posX];
 
-		resultado [( (posY + 1) * dimens.columnas) + posX]
-			= resultado [( (posY + 2) * dimens.columnas) + posX + 1];
+		matriz_comp [( (posY + 1) * dimens.columnas) + posX]
+			= matriz_comp [( (posY + 2) * dimens.columnas) + posX + 1];
 
-		resultado [( (posY + 2) * dimens.columnas) + posX + 1]
-			= resultado [( (posY + 1) * dimens.columnas) + posX + 2];
+		matriz_comp [( (posY + 2) * dimens.columnas) + posX + 1]
+			= matriz_comp [( (posY + 1) * dimens.columnas) + posX + 2];
 
-		resultado [( (posY + 1) * dimens.columnas) + posX + 2] = aux;
+		matriz_comp [( (posY + 1) * dimens.columnas) + posX + 2] = aux;
+
+		/* Copia el cuadrante de nuevo en memoria global (desenrrollamiento de
+		un bucle 'for') */
+		aux = (posY * dimens.columnas) + posX;
+		resultado [aux] = matriz_comp [aux];
+		resultado [aux + 1] = matriz_comp [aux + 1];
+		resultado [aux + 2] = matriz_comp [aux + 2];
+
+		aux = ( (posY + 1) * dimens.columnas) + posX;
+		resultado [aux] = matriz_comp [aux];
+		resultado [aux + 1] = matriz_comp [aux + 1];
+		resultado [aux + 2] = matriz_comp [aux + 2];
+
+		aux = ( (posY + 2) * dimens.columnas) + posX;
+		resultado [aux] = matriz_comp [aux];
+		resultado [aux + 1] = matriz_comp [aux + 1];
+		resultado [aux + 2] = matriz_comp [aux + 2];
 	}
 }
 
@@ -978,8 +1015,9 @@ int bomba_giro (Malla *malla)
 	/* Llama al núcleo para girar la matriz */
 	obtener_dim (&bloques, &hilos, malla->dimens);
 
-	KERNEL (err, girar_matriz_cuda,
+	KERNEL_COMP (err, girar_matriz_cuda,
 		bloques, hilos,
+		tam * sizeof matriz_d [0],
 		matriz_d, malla->dimens
 	);
 
