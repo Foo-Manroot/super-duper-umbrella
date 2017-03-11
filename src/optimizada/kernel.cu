@@ -195,7 +195,7 @@ __global__ void eliminar_fila_cuda (unsigned long semilla,
 		return;
 	}
 
-	/* Copia la fila en la memoria compartida */
+	/* Copia la columna en la memoria compartida */
 	for (i = 0; i <= fila_bomba; i++)
 	{
 		aux = (i * dimens.columnas) + columna;
@@ -268,9 +268,11 @@ __global__ void eliminar_columna_cuda (unsigned long semilla,
 {
 	int fila = blockIdx.y * blockDim.y + threadIdx.y,
 	    i,
-	    rand_int;
+	    rand_int,
+	    aux;
 
 	curandState estado;
+	extern __shared__ int matriz_comp [];
 
 	float rand_f;
 
@@ -279,11 +281,20 @@ __global__ void eliminar_columna_cuda (unsigned long semilla,
 		return;
 	}
 
+	/* Copia la columna en la memoria compartida */
+	for (i = 0; i <= col_bomba; i++)
+	{
+		aux = (fila * dimens.columnas) + i;
+		matriz_comp [aux] = resultado [aux];
+	}
+
+	/* ---- A partir de aquí, trabaja con la memoria compartida ---- */
+
 	/* Intercambia los elementos desde la fila actual hasta el principio */
 	for (i = col_bomba; i > 0; i--)
 	{
-		resultado [(fila * dimens.columnas) + i]
-			= resultado [(fila * dimens.columnas ) + i - 1];
+		aux = (fila * dimens.columnas) + i;
+		matriz_comp [aux] = matriz_comp [aux - 1];
 	}
 
 	/* Genera el último elemento */
@@ -300,7 +311,14 @@ __global__ void eliminar_columna_cuda (unsigned long semilla,
 	rand_int = __float2int_rz (rand_f);
 
 	/* Guarda el resultado */
-	resultado [fila * dimens.columnas] = rand_int;
+	matriz_comp [fila * dimens.columnas] = rand_int;
+
+	/* Copia los datos de vuelta a la memoria global */
+	for (i = 0; i <= col_bomba; i++)
+	{
+		aux = (fila * dimens.columnas) + i;
+		resultado [aux] = matriz_comp [aux];
+	}
 }
 
 /**
@@ -801,7 +819,7 @@ int bomba_fila (int fila_bomba, Malla *malla)
 
 	KERNEL_COMP (err, eliminar_fila_cuda,
 		bloques, hilos,
-		malla->dimens.columnas * fila_bomba * sizeof matriz_d [0],
+		malla->dimens.columnas * (fila_bomba + 1) * sizeof matriz_d [0],
 		time (NULL), matriz_d, 1, max, malla->dimens, fila_bomba
 	);
 
@@ -884,8 +902,9 @@ int bomba_columna (int col_bomba, Malla *malla)
 	/* Llama al núcleo para eliminar la columna */
 	obtener_dim (&bloques, &hilos, dim_matr_hilos);
 
-	KERNEL (err, eliminar_columna_cuda,
+	KERNEL_COMP (err, eliminar_columna_cuda,
 		bloques, hilos,
+		malla->dimens.filas * (col_bomba + 1) * sizeof matriz_d [0],
 		time (NULL), matriz_d, 1, max, malla->dimens, col_bomba
 	);
 
