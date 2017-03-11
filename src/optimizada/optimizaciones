@@ -9,6 +9,11 @@ implementado en los siguientes núcleos:
 	-> eliminar_fila_cuda
 	-> eliminar_columna_cuda
 	-> girar_matriz_cuda
+	-> buscar_coinc_cuda_fila (aquí se usan dos matrices en memoria compartida)
+	-> buscar_coinc_cuda_col (se usan dos matrices en memoria compartida)
+	-> llenar_vacios_cuda (es el único núcleo en el que se disminuye realmente el
+		número de accesos a memoria global)
+
 
 	El único sitio donde sí puede llevar alguna ventaja el uso de memoria
 compartida, debido al gran número de accesos, es buscar_lleno()

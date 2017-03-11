@@ -78,7 +78,7 @@ __device__ int buscar_lleno (int *matriz, int fila_ini, int columna, Dim dimens)
 	    aux;
 
 	while ( (elem == -1)
-		&& (fila > 0))
+		&& (fila >= 0))
 	{
 		aux = (fila * dimens.columnas) + columna;
 
@@ -190,7 +190,8 @@ __global__ void eliminar_fila_cuda (unsigned long semilla,
 	float rand_f;
 	extern __shared__ int matriz_comp [];
 
-	if (columna >= dimens.columnas)
+	if ( (columna >= dimens.columnas)
+		|| ( (blockIdx.y * blockDim.y + threadIdx.y) != 0) )
 	{
 		return;
 	}
@@ -276,12 +277,13 @@ __global__ void eliminar_columna_cuda (unsigned long semilla,
 
 	float rand_f;
 
-	if (fila >= dimens.filas)
+	if ( (fila >= dimens.filas)
+		|| ( (blockIdx.x * blockDim.x + threadIdx.x) != 0) )
 	{
 		return;
 	}
 
-	/* Copia la columna en la memoria compartida */
+	/* Copia la fila en la memoria compartida */
 	for (i = 0; i <= col_bomba; i++)
 	{
 		aux = (fila * dimens.columnas) + i;
@@ -432,23 +434,53 @@ __global__ void busar_coinc_cuda_fila (int *matriz,
 {
 	int fila = blockIdx.y * blockDim.y + threadIdx.y,
 	    i,
-	    aux = fila * dimens.columnas;
+	    aux;
+	extern __shared__ int mem_comp [];
 
-	if (fila >= dimens.filas)
+	int *matriz_comp,
+	    tam_matriz = dimens.filas * dimens.columnas,
+	    *coinc_comp;
+
+
+	if ( (fila >= dimens.filas)
+		|| ( (blockIdx.x * blockDim.x+ threadIdx.x) != 0) )
 	{
 		return;
 	}
 
+	/* Obtiene los punteros a las diferentes zonas de la memoria compartida */
+	matriz_comp = mem_comp;
+	coinc_comp = &mem_comp [tam_matriz];
+
+	/* Copia la fila en la memoria compartida */
+	for (i = 0; i < dimens.columnas; i++)
+	{
+		aux = (fila * dimens.columnas) + i;
+		matriz_comp [aux] = matriz [aux];
+		coinc_comp [aux] = coincidencias [aux];
+	}
+
+	/* ---- A partir de aquí, trabaja con la memoria compartida ---- */
+	aux = fila * dimens.columnas;
+
 	/* Recorre la matriz marcando los elementos iguales consecutivos */
 	for (i = 0; i < (dimens.columnas - 2) ; i++)
 	{
-		if ( (matriz [aux + i] == matriz [aux + i + 1])
-			&& (matriz [aux + i] == matriz [aux + i + 2]) )
+		if ( (matriz_comp [aux + i] == matriz_comp [aux + i + 1])
+			&& (matriz_comp [aux + i] == matriz_comp [aux + i + 2]) )
 		{
-			coincidencias [aux + i] = COINCIDE;
-			coincidencias [aux + i + 1] = COINCIDE;
-			coincidencias [aux + i + 2] = COINCIDE;
+			coinc_comp [aux + i] = COINCIDE;
+			coinc_comp [aux + i + 1] = COINCIDE;
+			coinc_comp [aux + i + 2] = COINCIDE;
 		}
+	}
+
+	/* Copia de vuelta los resultados (sólo hay que copiar la matriz con
+	las coincidencias) */
+	for (i = 0; i < dimens.columnas; i++)
+	{
+		aux = (fila * dimens.columnas) + i;
+		coincidencias [aux] = coinc_comp [aux];
 	}
 }
 
@@ -469,25 +501,56 @@ __global__ void busar_coinc_cuda_col (int *matriz,
 				      int *coincidencias)
 {
 	int columna = blockIdx.x * blockDim.x + threadIdx.x,
-	    i;
+	    i,
+	    aux;
+	extern __shared__ int mem_comp [];
 
-	if (columna >= dimens.columnas)
+	int *matriz_comp,
+	    tam_matriz = dimens.filas * dimens.columnas,
+	    *coinc_comp;
+
+	if ( (columna >= dimens.columnas)
+		|| ( (blockIdx.y * blockDim.y + threadIdx.y) != 0) )
 	{
 		return;
 	}
 
+	/* Obtiene los punteros a las diferentes zonas de la memoria compartida */
+	matriz_comp = mem_comp;
+	coinc_comp = &mem_comp [tam_matriz];
+
+	/* Copia la fila en la memoria compartida */
+	for (i = 0; i < dimens.filas; i++)
+	{
+		aux = (i * dimens.columnas) + columna;
+		matriz_comp [aux] = matriz [aux];
+		coinc_comp [aux] = coincidencias [aux];
+	}
+
+	/* ---- A partir de aquí, trabaja con la memoria compartida ---- */
+
 	/* Recorre la matriz marcando los elementos iguales consecutivos */
 	for (i = 0; i < (dimens.filas - 2) ; i++)
 	{
-		if ( (matriz [(i * dimens.columnas) + columna]
-			== matriz [( (i + 1) * dimens.columnas) + columna])
-			&& (matriz [(i * dimens.columnas) + columna]
-				== matriz [( (i + 2) * dimens.columnas) + columna]) )
+		aux = (i * dimens.columnas);
+
+		if ( (matriz_comp [aux + columna]
+			== matriz_comp [( (i + 1) * dimens.columnas) + columna])
+			&& (matriz_comp [aux + columna]
+				== matriz_comp [( (i + 2) * dimens.columnas) + columna]) )
 		{
-			coincidencias [(i * dimens.columnas) + columna] = COINCIDE;
-			coincidencias [(i + 1) * dimens.columnas + columna] = COINCIDE;
-			coincidencias [(i + 2) * dimens.columnas + columna] = COINCIDE;
+			coinc_comp [aux + columna] = COINCIDE;
+			coinc_comp [(i + 1) * dimens.columnas + columna] = COINCIDE;
+			coinc_comp [(i + 2) * dimens.columnas + columna] = COINCIDE;
 		}
+	}
+
+	/* Copia de vuelta los resultados (sólo hay que copiar la matriz con
+	las coincidencias) */
+	for (i = 0; i < dimens.filas; i++)
+	{
+		aux = (i * dimens.columnas) + columna;
+		coincidencias [aux] = coinc_comp [aux];
 	}
 }
 
@@ -551,25 +614,39 @@ __global__ void llenar_vacios_cuda (unsigned long semilla,
 	int columna = blockIdx.x * blockDim.x + threadIdx.x,
 	    i,
 	    elem,
-	    rand_int;
+	    rand_int,
+	    aux;
+
+	extern __shared__ int matriz_comp [];
 
 	curandState estado;
 	float rand_f;
 
-	if (columna >= dimens.columnas)
+	if ( (columna >= dimens.columnas)
+		|| ( (blockIdx.y * blockDim.y + threadIdx.y) != 0) )
 	{
 		return;
 	}
 
-	/* Recorre la columna hasta encontrar un elemento vacío */
-	for (i = dimens.filas; i >= 0; i--)
+	/* Copia la columna en la memoria compartida */
+	for (i = 0; i < dimens.filas; i++)
 	{
-		elem = resultado [(i * dimens.columnas) + columna];
+		aux = (i * dimens.columnas) + columna;
+		matriz_comp [aux] = resultado [aux];
+	}
+
+	/* ---- A partir de aquí, trabaja con la memoria compartida ---- */
+
+	/* Recorre la columna hasta encontrar un elemento vacío */
+	for (i = (dimens.filas - 1); i >= 0; i--)
+	{
+		aux = (i * dimens.columnas) + columna;
+		elem = matriz_comp [aux];
 
 		if (elem == DIAMANTE_VACIO)
 		{
 			/* Busca el primer elemento que haya por encima y lo baja */
-			elem = buscar_lleno (resultado, i, columna, dimens);
+			elem = buscar_lleno (matriz_comp, i, columna, dimens);
 
 			if (elem == -1)
 			{
@@ -590,8 +667,15 @@ __global__ void llenar_vacios_cuda (unsigned long semilla,
 				elem = rand_int;
 			}
 
-			resultado [(i * dimens.columnas) + columna] = elem;
+			matriz_comp [aux] = elem;
 		}
+	}
+
+	/* Copia de vuelta los resultados */
+	for (i = 0; i < dimens.filas; i++)
+	{
+		aux = (i * dimens.columnas) + columna;
+		resultado [aux] = matriz_comp [aux];
 	}
 }
 
@@ -1105,8 +1189,9 @@ int eliminar_coincidencias (Malla *malla)
 	/* Llama al núcleo para comprobar la matriz */
 	obtener_dim (&bloques, &hilos, dim_matr_hilos);
 
-	KERNEL (err, busar_coinc_cuda_fila,
+	KERNEL_COMP (err, busar_coinc_cuda_fila,
 		bloques, hilos,
+		(2 * tam * sizeof matriz_d [0]),
 		matriz_d, malla->dimens, coincidencias_d
 	);
 
@@ -1114,8 +1199,9 @@ int eliminar_coincidencias (Malla *malla)
 	dim_matr_hilos.columnas = malla->dimens.columnas;
 	obtener_dim (&bloques, &hilos, dim_matr_hilos);
 
-	KERNEL (err, busar_coinc_cuda_col,
+	KERNEL_COMP (err, busar_coinc_cuda_col,
 		bloques, hilos,
+		(2 * tam * sizeof matriz_d [0]),
 		matriz_d, malla->dimens, coincidencias_d
 	);
 
@@ -1203,8 +1289,9 @@ int llenar_vacios (Malla *malla)
 	/* Llama al núcleo para comprobar la matriz */
 	obtener_dim (&bloques, &hilos, dim_matr_hilos);
 
-	KERNEL (err, llenar_vacios_cuda,
+	KERNEL_COMP (err, llenar_vacios_cuda,
 		bloques, hilos,
+		tam * sizeof matriz_d [0],
 		time (NULL), matriz_d, 1, max, malla->dimens
 	);
 
