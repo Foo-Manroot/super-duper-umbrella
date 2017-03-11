@@ -78,7 +78,7 @@ __device__ int buscar_lleno (int *matriz, int fila_ini, int columna, Dim dimens)
 	    aux;
 
 	while ( (elem == -1)
-		&& (fila > 0))
+		&& (fila >= 0))
 	{
 		aux = (fila * dimens.columnas) + columna;
 
@@ -189,7 +189,8 @@ __global__ void eliminar_fila_cuda (unsigned long semilla,
 
 	float rand_f;
 
-	if (columna >= dimens.columnas)
+	if ((columna >= dimens.columnas)
+		|| ( (blockIdx.y * blockDim.y + threadIdx.y) != 0) )
 	{
 		return;
 	}
@@ -258,7 +259,8 @@ __global__ void eliminar_columna_cuda (unsigned long semilla,
 
 	float rand_f;
 
-	if (fila >= dimens.filas)
+	if ((fila >= dimens.filas)
+		|| ( (blockIdx.x * blockDim.x + threadIdx.x) != 0) )
 	{
 		return;
 	}
@@ -363,7 +365,8 @@ __global__ void busar_coinc_cuda_fila (int *matriz,
 	    i,
 	    aux = fila * dimens.columnas;
 
-	if (fila >= dimens.filas)
+	if ( (fila >= dimens.filas)
+		|| ( (blockIdx.x * blockDim.x + threadIdx.x) != 0) )
 	{
 		return;
 	}
@@ -400,7 +403,8 @@ __global__ void busar_coinc_cuda_col (int *matriz,
 	int columna = blockIdx.x * blockDim.x + threadIdx.x,
 	    i;
 
-	if (columna >= dimens.columnas)
+	if ( (columna >= dimens.columnas)
+		|| ( (blockIdx.y * blockDim.y + threadIdx.y) != 0) )
 	{
 		return;
 	}
@@ -485,13 +489,14 @@ __global__ void llenar_vacios_cuda (unsigned long semilla,
 	curandState estado;
 	float rand_f;
 
-	if (columna >= dimens.columnas)
+	if ( (columna >= dimens.columnas)
+		|| ( (blockIdx.y * blockDim.y + threadIdx.y) != 0) )
 	{
 		return;
 	}
 
 	/* Recorre la columna hasta encontrar un elemento vacío */
-	for (i = dimens.filas; i >= 0; i--)
+	for (i = (dimens.filas - 1); i >= 0; i--)
 	{
 		elem = resultado [(i * dimens.columnas) + columna];
 
