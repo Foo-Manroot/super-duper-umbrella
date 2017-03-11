@@ -54,6 +54,34 @@
 	}
 
 
+/**
+ * Realiza la llamada al núcleo CUDA que usa memoria compartida 
+ * y comprueba el código de error. Si hay algún error, devuelve (return) ERR_CUDA.
+ */
+#define KERNEL_COMP(err, nombre, bloques, hilos, tam, ...)			\
+	imprimir (DETALLE_DEBUG,  "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n"		\
+				"Lanzando el núcleo '%s' con las "		\
+				"siguientes dimensiones: \n"			\
+				"\tBloques: x=%d, y=%d\n"			\
+				"\tHilos (por bloque): x=%d, y=%d, z=%d\n"	\
+				"\tMemoria compartida: %d bytes\n"		\
+				"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",		\
+				#nombre,					\
+				bloques.x, bloques.y,				\
+				hilos.x, hilos.y, hilos.z,			\
+				tam);						\
+	nombre <<< (bloques), (hilos) , (tam) >>> (__VA_ARGS__);		\
+										\
+	if ((err = cudaGetLastError ()) != cudaSuccess)				\
+	{									\
+		imprimir (DETALLE_LOG, "Error en la línea %d de '%s': "		\
+				"%s\n", __LINE__, __FILE__,			\
+				cudaGetErrorString (err));			\
+		return ERR_CUDA;						\
+	}
+
+
+
 /* --------------------------------------- */
 /* DECLARACIÓN DE FUNCIONES DE DISPOSITIVO */
 /* --------------------------------------- */
