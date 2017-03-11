@@ -18,18 +18,9 @@
 /* ------------------------ */
 /* DECLARACIÓN DE FUNCIONES */
 /* ------------------------ */
-void recorrer_malla (Malla malla);
-
-void recorrer_malla_reorden (Malla malla);
-void reordenar_tablero (int posY,int posX,Malla malla);
-
-void recorrer_malla_huecos (Malla malla);
-
-void tratar_huecos(int posY, int posX, Malla malla);
-
 void mover_diamante(int posY, int posX, int mov, Malla malla);
 
 int es_valido(int posY, int posX, int mov, Malla malla);
-Diamante generar_diamante();
+
 
 #endif
