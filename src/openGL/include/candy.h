@@ -35,6 +35,12 @@
 
 
 /**
+ * Umbral para controlar los FPS de manera chapucera
+ */
+#define UMBRAL_FPS 1000000
+
+
+/**
  * Movimientos de diamantes posibles
  */
 #define MOV_DER 0
@@ -74,7 +80,7 @@ void dibujar_casilla (float x, float y, int posX, int posY);
 /**
  * Dibuja los elementos en la pantalla.
  */
-void manejador_gui (void);
+void render (void);
 
 /**
  * Controla el evento al redimensionar la ventana.

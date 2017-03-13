@@ -33,6 +33,16 @@ bool bomba_act = false;
  */
 int sel_bomba = -1;
 
+/**
+ * Cuando está a 'true', significa que ha habido algún cambio.
+ */
+bool cambio = false;
+
+/**
+ * Contador para controlar los FPS (de una manera un poco chapucera).
+ */
+int contador = 0;
+
 
 /* ----*------------------------------*---- */
 
@@ -112,9 +122,9 @@ void iniciar_opengl (int argc, char *argv [])
 	glutCreateWindow ("Candy");
 
 	/* Establece las funciones manejadoras */
-	glutDisplayFunc (manejador_gui);
+	glutDisplayFunc (render);
 	glutReshapeFunc (manejador_redim);
-	glutIdleFunc (manejador_gui);
+	glutIdleFunc (render);
 
 	glutKeyboardFunc (manejador_teclas);
 	glutMouseFunc (manejador_raton);
@@ -184,13 +194,20 @@ void dibujar_casilla (float x, float y, int posX, int posY)
 /**
  * Dibuja los elementos en la pantalla.
  */
-void manejador_gui (void)
+void render (void)
 {
 	int i,
 	    j;
 
 	float x = ( ((float) malla.dimens.columnas) * ((float) (lado + espacio)) ),
 	      y = ( ((float) malla.dimens.filas) * ((float) (lado + espacio)) );
+
+	if (contador < UMBRAL_FPS)
+	{
+		contador++;
+		return;
+	}
+	contador = 0;
 
 	/* Limpia el buffer */
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -218,6 +235,23 @@ void manejador_gui (void)
 	}
 
 	glutSwapBuffers ();
+
+	/* Comprueba los huecos si ha habido algún cambio */
+	if (cambio)
+	{
+		eliminar_coincidencias (&malla);
+
+		imprimir (DETALLE_DEBUG, "Estado de la matriz tras eliminar"
+					 " coincidencias: \n");
+		if (ver_nv_detalle () >= DETALLE_DEBUG)
+		{
+			mostrar_malla (malla);
+		}
+
+		llenar_vacios (&malla);
+
+		cambio = false;
+	}
 }
 
 /**
@@ -327,11 +361,14 @@ void manejador_teclas (unsigned char tecla, int x, int y)
 				break;
 			case 2:
 				imprimir (DETALLE_DEBUG,
-				  "Bomba para eliminar la columna %c\n", tecla);
+					  "Bomba para eliminar la columna %c\n",
+					   tecla);
 				/* Llama a la función que utiliza CUDA */
 				bomba_columna (char_to_int (tecla), &malla);
 				break;
 		}
+
+		cambio = true;
 
 		bomba_act = false;
 		sel_bomba = -1;
@@ -362,6 +399,8 @@ void manejador_teclas (unsigned char tecla, int x, int y)
 		case '3':
 			if (bomba_act)
 			{
+				cambio = true;
+
 				imprimir (DETALLE_EXTRA, "Seleccionada bomba III.\n");
 				bomba_giro (&malla);
 				bomba_act = false;
