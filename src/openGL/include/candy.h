@@ -20,10 +20,8 @@
  */
 #define CONVERTIR_COORD_RATON(x, y)						\
 	x = ( ((float) x) / ((float) glutGet (GLUT_WINDOW_WIDTH))  ) - 0.5f;	\
-	y = ( ((float) y) / ((float) glutGet (GLUT_WINDOW_HEIGHT)) ) - 0.5f;	\
-	/* Ajusta las proporciones (?) */					\
-	x *= 5.0f;								\
-	y *= 5.0f;
+	y = ( ((float) y) / ((float) glutGet (GLUT_WINDOW_HEIGHT)) ) - 0.5f;
+
 
 /**
  * Macro para convertir la coordenada X con respecto a la ventana (GLUT) en coordenada
@@ -37,7 +35,12 @@
 /**
  * Umbral para controlar los FPS de manera chapucera
  */
-#define UMBRAL_FPS 1000000
+#define UMBRAL_FPS 100000
+
+/**
+ * En las coordenadas de GLUT, el lado de los cuadrados parece ser este (sacado a ojo)
+ */
+#define PASO_X 0.0673
 
 
 /**
@@ -113,6 +116,22 @@ void manejador_gui (void);
  * 	cuando se pulsó la tecla.
  */
 void manejador_teclas (unsigned char tecla, int x, int y);
+
+/**
+ * Obtiene la columna (más o menos) a la que pertenecen las coordenadas x e y
+ * (respectivas al juego, según se usan en OpenGL).
+ *
+ * @param x
+ * 		Posición X del ratón (convertida a coordenada OpenGL).
+ *
+ * @param y
+ * 		Posición Y del ratón (convertida a coordenada OpenGL).
+ *
+ *
+ * @return
+ * 		La columna, o -1 si está fuera de la matriz.
+ */
+int obtener_col (float x, float y);
 
 /**
  * Procesa un evento provocado por el ratón.

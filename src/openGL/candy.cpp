@@ -294,6 +294,58 @@ void manejador_redim (int w, int h)
 }
 
 /**
+ * Obtiene la columna (más o menos) a la que pertenecen las coordenadas x e y
+ * (respectivas al juego, según se usan en OpenGL).
+ *
+ * @param x
+ * 		Posición X del ratón (convertida a coordenada OpenGL).
+ *
+ * @param y
+ * 		Posición Y del ratón (convertida a coordenada OpenGL).
+ *
+ *
+ * @return
+ * 		La columna, o -1 si está fuera de la matriz.
+ */
+int obtener_col (float x, float y)
+{
+	/* Dimensiones de la ventana */
+	float ancho = ( ((float) malla.dimens.columnas) * ((float) (lado + espacio)) ),
+	      alto = ( ((float) malla.dimens.filas) * ((float) (lado + espacio)) ),
+	      col = 0,
+	      aux = 0.0f;
+	bool par = (malla.dimens.columnas % 2) == 0;
+
+	ancho = y;
+	alto = y;
+
+	/* Obtiene la celda sobre la que se ha pulsado (si es que
+ 	 se pulsó sobre alguna) */
+	aux = x;
+	/* Si el número de columnas es impar, la columna central ocupa desde
+ 	-PASO_X/2 hasta PASO_X/2 */
+	if (!par)
+	{
+		aux += (x < 0)? -(PASO_X / 2) : (PASO_X / 2);
+	}
+
+	col = (x < 0)? floor (aux / PASO_X) : ceil (aux / PASO_X);
+
+	/* Ajusta el índice para coincidir con la notación: de 0 a (n-1) */
+	if (col < 0)
+	{
+		col += (par)? floor (malla.dimens.columnas / 2)
+			    : floor (malla.dimens.columnas / 2) + 1;
+	}
+	else
+	{
+		col += (floor (malla.dimens.columnas / 2)) - 1;
+	}
+
+	return col;
+}
+
+/**
  * Procesa un evento provocado por el ratón.
  *
  * @param boton
@@ -313,6 +365,12 @@ void manejador_raton (int boton, int estado, int posX, int posY)
 	float x = (float) posX,
 	      y = (float) posY;
 
+	/* Botón liberadoi */
+	if (estado == GLUT_UP)
+	{
+		return;
+	}
+
 	CONVERTIR_COORD_RATON (x, y);
 
 	imprimir (DETALLE_EXTRA,
@@ -320,6 +378,8 @@ void manejador_raton (int boton, int estado, int posX, int posY)
 		  "\tPosición respecto a la ventana (GLUT) -> x: %f, y: %f\n",
 		  __FUNCTION__, boton, estado, posX, posY,
 		  x, y);
+
+	obtener_col (x, y);
 }
 
 /**
@@ -351,6 +411,8 @@ void manejador_teclas (unsigned char tecla, int x, int y)
 		)
 	)
 	{
+		/* Elimina la fila o columna seleccionada, en función de la bomba que
+ 		 estuviera activa */
 		switch (sel_bomba)
 		{
 			case 1:
@@ -382,21 +444,21 @@ void manejador_teclas (unsigned char tecla, int x, int y)
 			exit (SUCCESS);
 			break;
 
-		case '1':
+		case '1': /* Bomba 1 (si es que estaba activa la selección de bomba */
 			if (bomba_act)
 			{
 				imprimir (DETALLE_EXTRA, "Seleccionada bomba I.\n");
 				sel_bomba = 1;
 			}
 			break;
-		case '2':
+		case '2': /* Bomba 2 (si es que estaba activa la selección de bomba */
 			if (bomba_act)
 			{
 				imprimir (DETALLE_EXTRA, "Seleccionada bomba II.\n");
 				sel_bomba = 2;
 			}
 			break;
-		case '3':
+		case '3': /* Bomba 3 (si es que estaba activa la selección de bomba */
 			if (bomba_act)
 			{
 				cambio = true;
@@ -406,11 +468,12 @@ void manejador_teclas (unsigned char tecla, int x, int y)
 				bomba_act = false;
 			}
 			break;
-		case '9':
+		case '9': /* Activa la selección de bomba */
 			bomba_act = true;
 			break;
 	}
 }
+
 
 /*
  * es_valido()
