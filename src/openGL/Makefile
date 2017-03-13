@@ -3,7 +3,7 @@
 
 GCC=nvcc
 NVCC=nvcc
-CFLAGS=
+CFLAGS=-lGL -lglut -lGLU
 NVCCFLAGS=
 OBJFLAGS=-c
 LIB=ar rcs

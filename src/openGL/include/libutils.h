@@ -220,4 +220,17 @@ int max_nv (Malla malla);
  */
 int ver_nv_detalle ();
 
+/**
+ * Convierte un carácter a su valor numérico. Por ejemplo, si se introduce '9', se
+ * devuelve el valor entero 9.
+ *
+ * @param caracter
+ * 		El carácter a convertir.
+ *
+ * 
+ * @return
+ * 		El valor numérico representado con ese carácter, o -1 si no era
+ * 	un número. */
+int char_to_int (char caracter);
+
 #endif
