@@ -11,7 +11,7 @@
 >		Práctica de Ampliación de Programación Avanzada.
 >		Daniel Estangüi y Miguel García
 >	Uso correcto:
->	joyas [-hman:f:c:v]
+>	./candy [-hman:f:c:v]
 >		-h
 >			Muestra este mensaje de ayuda y sale del programa
 >		-a | -m

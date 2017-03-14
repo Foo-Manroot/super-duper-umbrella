@@ -21,7 +21,7 @@
 Práctica de Ampliación de Programación Avanzada.\n\
 	Daniel Estangüi y Miguel García\n\
 Uso correcto:\n\
-joyas [-hman:f:c:v]\n\
+./candy [-hman:f:c:v]\n\
 	-h\n\
 		Muestra este mensaje de ayuda y sale del programa\n\
 	-a | -m\n\
