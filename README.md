@@ -11,8 +11,8 @@ Se puede leer el principio de 'Memoria.qwer' para obtener más detalles sobre la
 ## Dependencias
 La implementación con CPU no tiene más dependencias que las bibliotecas estándar; así que sólo hace falta un compilador para C. Por defecto, el Makefile utiliza _gcc_; pero se puede cambiar de compilador cambiando el valor de la variable _GCC_. Por ejemplo, si se quisiera usar el compilador _cc_, se ejecutaría `make GCC=cc`
 
-Para compilar los archivos que usen CUDA hacen falta las bibliotecas y herramientas proporcionadas con el [cuda-toolkit](https://developer.nvidia.com/cuda-toolkit). Si no están instaladas, el sistema no encontrará el compilador usado, _nvcc_
-Para ejecutar cualquier cosa que no sea cpu/candy, hace falta una tarjeta que soporte CUDA (las de NVidia).
+Para compilar los archivos que usen CUDA hacen falta las bibliotecas y herramientas proporcionadas con el [cuda-toolkit](https://developer.nvidia.com/cuda-toolkit). Si no están instaladas, el sistema no encontrará el compilador usado, _nvcc_.
+Para ejecutar cualquier cosa que no sea _cpu/candy_, hace falta una tarjeta que soporte CUDA (las de NVidia).
 
 ## Compilación
 Para compilar hay un Makefile en cada carpeta con las distintas implementaciones. Para compilar cada una de estas subcarpetas, simplemente hay que ejecutar `make`.
