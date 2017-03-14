@@ -31,6 +31,11 @@
 	x = ( ((float) x) + 0.5f * ((float) glutGet (GLUT_WINDOW_WIDTH))  );	\
 	y = ( ((float) y) + 0.5f * ((float) glutGet (GLUT_WINDOW_HEIGHT)) );
 
+/**
+ * Archivo por defecto para guardar/cargar partidas
+ */
+#define ARCHIVO_PARTIDA_OPENGL "partida.asdf.pepe"
+
 
 /**
  * Umbral para controlar los FPS de manera chapucera
@@ -41,6 +46,7 @@
  * En las coordenadas de GLUT, el lado de los cuadrados parece ser este (sacado a ojo)
  */
 #define PASO_X 0.0673
+#define PASO_Y 0.1346
 
 
 /**
@@ -124,14 +130,23 @@ void manejador_teclas (unsigned char tecla, int x, int y);
  * @param x
  * 		Posición X del ratón (convertida a coordenada OpenGL).
  *
+ * @return
+ * 		La columna, o -1 si está fuera de la matriz.
+ */
+int obtener_col (float x);
+
+/**
+ * Obtiene la fila (más o menos) a la que pertenecen las coordenadas x e y
+ * (respectivas al juego, según se usan en OpenGL).
+ *
  * @param y
  * 		Posición Y del ratón (convertida a coordenada OpenGL).
  *
  *
  * @return
- * 		La columna, o -1 si está fuera de la matriz.
+ * 		La fila, o -1 si está fuera de la matriz.
  */
-int obtener_col (float x, float y);
+int obtener_fila (float y);
 
 /**
  * Procesa un evento provocado por el ratón.

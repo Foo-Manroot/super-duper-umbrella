@@ -24,6 +24,11 @@ Dim ventana,
     pantalla;
 
 /**
+ * Casilla seleccionada actualmente
+ */
+Dim casilla_sel;
+
+/**
  * Bandera que indica que se quiere lanzar una bomba.
  */
 bool bomba_act = false;
@@ -88,8 +93,6 @@ int main (int argc, char *argv[])
 	reservar_mem (&malla);
 	rellenar (&malla);
 
-//	menu (malla);
-
 	iniciar_opengl (argc, argv);
 
 	return SUCCESS;
@@ -140,6 +143,9 @@ void iniciar_opengl (int argc, char *argv [])
 		  "Dimensiones de la ventana: %d x %d.\n",
 		  pantalla.filas, pantalla.columnas,
 		  ventana.filas, ventana.columnas);
+
+	casilla_sel.filas = -1;
+	casilla_sel.columnas = -1;
 // PARA HACER PRUEBAS, MUESTRA LA MATRIZ GENERADA
 //menu (malla);
 // -----------------------------------------------------------
@@ -300,24 +306,15 @@ void manejador_redim (int w, int h)
  * @param x
  * 		Posición X del ratón (convertida a coordenada OpenGL).
  *
- * @param y
- * 		Posición Y del ratón (convertida a coordenada OpenGL).
- *
- *
  * @return
  * 		La columna, o -1 si está fuera de la matriz.
  */
-int obtener_col (float x, float y)
+int obtener_col (float x)
 {
 	/* Dimensiones de la ventana */
-	float ancho = ( ((float) malla.dimens.columnas) * ((float) (lado + espacio)) ),
-	      alto = ( ((float) malla.dimens.filas) * ((float) (lado + espacio)) ),
-	      col = 0,
+	float col = 0,
 	      aux = 0.0f;
 	bool par = (malla.dimens.columnas % 2) == 0;
-
-	ancho = y;
-	alto = y;
 
 	/* Obtiene la celda sobre la que se ha pulsado (si es que
  	 se pulsó sobre alguna) */
@@ -342,8 +339,123 @@ int obtener_col (float x, float y)
 		col += (floor (malla.dimens.columnas / 2)) - 1;
 	}
 
+	if ((col >= malla.dimens.columnas) || (col < 0))
+	{
+		return -1;
+	}
+
 	return col;
 }
+
+
+/**
+ * Obtiene la fila (más o menos) a la que pertenecen las coordenadas x e y
+ * (respectivas al juego, según se usan en OpenGL).
+ *
+ * @param y
+ * 		Posición Y del ratón (convertida a coordenada OpenGL).
+ *
+ *
+ * @return
+ * 		La fila, o -1 si está fuera de la matriz.
+ */
+int obtener_fila (float y)
+{
+	/* Dimensiones de la ventana */
+	float fila = 0,
+	      aux = 0.0f;
+	bool par = (malla.dimens.filas % 2) == 0;
+
+	/* Obtiene la celda sobre la que se ha pulsado (si es que
+ 	 se pulsó sobre alguna) */
+	aux = y;
+	/* Si el número de filas es impar, la fila central ocupa desde
+ 	-PASO_Y/2 hasta PASO_Y/2 */
+	if (!par)
+	{
+		aux += (y < 0)? -(PASO_Y / 2) : (PASO_Y / 2);
+	}
+
+	fila = (y < 0)? floor (aux / PASO_Y) : ceil (aux / PASO_Y);
+
+	/* Ajusta el índice para coincidir con la notación: de 0 a (n-1) */
+	if (fila < 0)
+	{
+		fila += (par)? floor (malla.dimens.filas / 2)
+			    : floor (malla.dimens.filas / 2) + 1;
+	}
+	else
+	{
+		fila += (floor (malla.dimens.filas / 2)) - 1;
+	}
+
+	if ((fila >= malla.dimens.filas) || (fila < 0))
+	{
+		return -1;
+	}
+
+
+	return fila;
+}
+
+/**
+ * Obtiene el movimiento seleccionado segúnlas casillas seleccionadas para intercambiar.
+ *
+ * @param fila
+ * 		Fila de la nueva casilla seleccionada.
+ *
+ * @param col
+ * 		Columna de la nueva casilla seleccionada.
+ *
+ *
+ * @return
+ * 		Un elemento de tipo MOV_* (definidos en candy.h), o ERR_MOV si no es un
+ * 	movimiento aceptado (por ejemplo, se ha seleccionado otra vez la misma casilla).
+ */
+int obtener_movimiento (int fila, int col)
+{
+	if ( (fila == casilla_sel.filas)
+	    && (col == casilla_sel.columnas)
+	)
+	{
+		return ERR_MOV;
+	}
+
+	/* Fila arriba */
+	if ( ((fila - casilla_sel.filas) < 0)
+	   && (col == casilla_sel.columnas)
+	)
+	{
+		return MOV_ARRIBA;
+	}
+
+	/* Fila abajo */
+	if ( ((fila - casilla_sel.filas) > 0)
+	   && (col == casilla_sel.columnas)
+	)
+	{
+		return MOV_ABAJO;
+	}
+
+	/* Columna a la izquierda */
+	if ( ((col - casilla_sel.columnas) < 0)
+	   && (fila == casilla_sel.filas)
+	)
+	{
+		return MOV_IZQ;
+	}
+
+	/* Columna a la derecha */
+	if ( ((col - casilla_sel.columnas) > 0)
+	   && (fila == casilla_sel.filas)
+	)
+	{
+		return MOV_DER;
+	}
+
+	return ERR_MOV;
+}
+
 
 /**
  * Procesa un evento provocado por el ratón.
@@ -365,7 +477,11 @@ void manejador_raton (int boton, int estado, int posX, int posY)
 	float x = (float) posX,
 	      y = (float) posY;
 
-	/* Botón liberadoi */
+	int columna,
+	    fila,
+	    mov = ERR_MOV;
+
+	/* Botón liberado */
 	if (estado == GLUT_UP)
 	{
 		return;
@@ -379,7 +495,39 @@ void manejador_raton (int boton, int estado, int posX, int posY)
 		  __FUNCTION__, boton, estado, posX, posY,
 		  x, y);
 
-	obtener_col (x, y);
+	columna = obtener_col (x);
+	fila = obtener_fila (y);
+
+	/* Si se ha pinchado dentro de la matriz, selecciona la casilla */
+	if ((columna != -1) && (fila != -1))
+	{
+		imprimir (DETALLE_DEBUG,
+			  "Seleccionada la casilla [%d : %d]\n",
+			  fila, columna);
+		/* Si había alguna casilla seleccionada, las intercambia */
+		if ( (casilla_sel.columnas != -1) && (casilla_sel.filas != -1) )
+		{
+			mov = obtener_movimiento (fila, columna);
+			if (mov != ERR_MOV)
+			{
+				imprimir (DETALLE_DEBUG,
+					  "Movimiento de la casilla [%d : %d]\n",
+					  casilla_sel.filas, casilla_sel.columnas);
+
+				mover_diamante (casilla_sel.filas, casilla_sel.columnas,
+						mov, malla);
+				cambio = true;
+				/* Reinicia la casilla seleccionada */
+				casilla_sel.filas = -1;
+				casilla_sel.columnas = -1;
+			}
+		}
+		else
+		{
+			casilla_sel.filas = fila;
+			casilla_sel.columnas = columna;
+		}
+	}
 }
 
 /**
@@ -471,9 +619,30 @@ void manejador_teclas (unsigned char tecla, int x, int y)
 		case '9': /* Activa la selección de bomba */
 			bomba_act = true;
 			break;
+
+		case 'g':
+			/* Guarda en el archivo por defecto */
+			if (guardar (malla, ARCHIVO_PARTIDA_OPENGL) == SUCCESS)
+			{
+				imprimir (DETALLE_LOG,
+					  "Partida guardada con éxito en '%s'\n",
+					  ARCHIVO_PARTIDA_OPENGL);
+			}
+			break;
+
+		case 'c':
+			/* Carga la partida desde el archivo por defecto */
+			if (cargar (&malla, ARCHIVO_PARTIDA_OPENGL) == SUCCESS)
+			{
+				imprimir (DETALLE_LOG,
+					 "Partida cargada con éxito desde '%s'\n",
+					 ARCHIVO_PARTIDA_OPENGL);
+			}
+			break;
 	}
 }
 
+/* --- Fin de las funciones para OpenGL ----  */
 
 /*
  * es_valido()

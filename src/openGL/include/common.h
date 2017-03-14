@@ -116,4 +116,9 @@ typedef struct {
  */
 #define ERR_TAM -5
 
+/**
+ * Movimiento no válido
+ */
+#define ERR_MOV -6
+
 #endif

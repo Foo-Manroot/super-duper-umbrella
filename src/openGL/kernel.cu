@@ -758,7 +758,7 @@ int obtener_dim (dim3 *bloques, dim3 *hilos, Dim tam_matriz)
 	}
 
 	/* Limitación para la práctica. Si la matriz cabe en un bloque, se divide para
-	que ocupe 4 */
+	que ocupe más */
 	if ((tam_matriz.columnas * tam_matriz.filas) < propiedades.maxThreadsPerBlock)
 	{
 		hilos->x = ceil ( ((float) tam_matriz.columnas) / 2.0 );
