@@ -48,6 +48,6 @@ Para jugar en las versiones en consola se presenta un menú para seleccionar la 
 En la versión con OpenGL se pueden seleccionar dos casillas para intercambiarlas. Además, se pueden usar las siguientes teclas:
   - g: Guarda la partida en el archivo por defecto
   - c: Carga la partida del archivo por defecto
-  - 91_x_: Elimina la fila _x_ (bomba I)
-  - 92_x_: Elimina la columna _x_ (bomba II)
+  - 91x: Elimina la fila _x_ (bomba I)
+  - 92x: Elimina la columna _x_ (bomba II)
   - 93: Gira las casillas en grupos de 3x3 (bomba III)
