@@ -51,28 +51,6 @@ int contador = 0;
 
 /* ----*------------------------------*---- */
 
-
-/* ___________________________________________________________________________________ */
-
-void DrawAxes()
-{
-/* Sacado de https://www.opengl.org/discussion_boards/showthread.php/141098-axis-display */
-//positive x axis
-glColor3f(1.0f, 0.0f, 0.0f ); //red is x axis
-glBegin( GL_LINES );
-glVertex3f( 0.0f, 0.0f,0.0f );
-glVertex3f( 1.0f, 0.0f,0.0f );
-//y axis
-glColor3f(0.0f, 1.0f, 0.0f ); //green is y axis
-glVertex3f( 0.0f, 0.0f,0.0f );
-glVertex3f( 0.0f, 1.0f,0.0f );
-//z axis
-glColor3f(0.0f, 0.0f, 1.0f ); //blue is z axis
-glVertex3f( 0.0f, 0.0f,0.0f );
-glVertex3f( 0.0f, 0.0f,1.0f );
-}
-/* ___________________________________________________________________________________ */
-
 int main (int argc, char *argv[])
 {
 	/* Comprueba los argumentos */
@@ -107,16 +85,12 @@ int main (int argc, char *argv[])
  */
 void iniciar_opengl (int argc, char *argv [])
 {
-//	float ancho = ( ((float) malla.dimens.columnas) * ((float) (lado + espacio)) ),
-//	      alto = ( ((float) malla.dimens.filas) * ((float) (lado + espacio)) );
-
 	glutInit (&argc, argv);
 
 	pantalla.filas = glutGet (GLUT_SCREEN_HEIGHT);
 	pantalla.columnas = glutGet (GLUT_SCREEN_WIDTH);
 
 	/* Inicializa la ventana con los datos necesarios (posición, tamaño...) */
-//	glutInitWindowSize (ancho * 50, alto * 50);
 	glutInitWindowSize (glutGet (GLUT_SCREEN_WIDTH), glutGet (GLUT_SCREEN_HEIGHT));
 
 	glutInitWindowPosition (-1, -1);
@@ -146,9 +120,7 @@ void iniciar_opengl (int argc, char *argv [])
 
 	casilla_sel.filas = -1;
 	casilla_sel.columnas = -1;
-// PARA HACER PRUEBAS, MUESTRA LA MATRIZ GENERADA
-//menu (malla);
-// -----------------------------------------------------------
+
 	/* Inicia el bucle principal */
 	glutMainLoop ();
 

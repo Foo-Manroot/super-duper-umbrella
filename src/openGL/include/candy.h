@@ -147,6 +147,21 @@ int obtener_col (float x);
  * 		La fila, o -1 si está fuera de la matriz.
  */
 int obtener_fila (float y);
+/**
+ * Obtiene el movimiento seleccionado segúnlas casillas seleccionadas para intercambiar.
+ *
+ * @param fila
+ * 		Fila de la nueva casilla seleccionada.
+ *
+ * @param col
+ * 		Columna de la nueva casilla seleccionada.
+ *
+ *
+ * @return
+ * 		Un elemento de tipo MOV_* (definidos en candy.h), o ERR_MOV si no es un
+ * 	movimiento aceptado (por ejemplo, se ha seleccionado otra vez la misma casilla).
+ */
+int obtener_movimiento (int fila, int col);
 
 /**
  * Procesa un evento provocado por el ratón.
