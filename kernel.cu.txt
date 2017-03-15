@@ -468,21 +468,14 @@ int realizar_jugada_vertical(Malla * malla,int * jugada)
 	return SUCCESS;
 }
 
-/**
- * Busca la mejor jugada entre las horizontales y las verticales, y 
- * ejecuta la mejor jugada
- *
- * @return
- *		SUCCESS si todo ha salido correctamente.
- *		ERR_CUDA si hubo algún error al obtener las características del
- *	dispositivo.
- *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
- *	dispositivo.
- */
 int realizar_jugada(Malla * malla)
 {
 	int jugada_v[4];
 	int jugada_h[4];
+
+	int posY;
+	int posX;
+	int mov;
 
 	realizar_jugada_vertical(malla,jugada_v);
 	realizar_jugada_horizontal(malla,jugada_h);
@@ -490,11 +483,17 @@ int realizar_jugada(Malla * malla)
 	if(jugada_v[0]>jugada_h[0])
 	{
 		printf("Mejor jugada --> Mov(%d): %d PosY: %d PosX: %d\n",jugada_v[0],jugada_v[1],jugada_v[2],jugada_v[3]);
+		posY = jugada_v[2];
+		posX = jugada_v[3];
+		mov = jugada_v[1];
 	}
 	else
 	{
 		printf("Mov(%d): %d PosY: %d PosX: %d\n",jugada_h[0],jugada_h[1],jugada_h[2],jugada_h[3]);
+		posY = jugada_h[2];
+		posX = jugada_h[3];
+		mov = jugada_h[1];
 	}
-
+	mover_diamante(posY,posX,mov,* malla);
 	return SUCCESS;
 }
