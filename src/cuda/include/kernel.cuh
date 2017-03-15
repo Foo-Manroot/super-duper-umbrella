@@ -356,4 +356,79 @@ int eliminar_coincidencias (Malla *malla);
  */
 int llenar_vacios (Malla *malla);
 
+/**
+ * Busca las mejores jugadas por filas
+ *
+ * @param matriz
+ *		Matriz con los valores actuales de los diamantes.
+ *
+ * @param dimens
+ *		Estructura con las dimensiones de la matriz.
+ *
+ * @param mat2
+ *		Matriz en la que se va a indicar los valores de las mejores 
+ *		jugadas por posicion
+ *
+ * @param solh
+ *		Matriz que devuleve las mejores jugdas(posicion, movimiento 
+ *		y valor de cada jugada).
+ */
+__global__ void realizar_jugada_cuda_horizontal (int * mat, Dim dimens,int * mat2, int * solh);
+
+/**
+ * Busca las mejores jugadas por filas
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		ERR_CUDA si hubo alg˙n error al obtener las caracterÌsticas del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
+ */
+int realizar_jugada_horizontal(Malla * malla, int * jugada);
+
+/**
+ * Busca las mejores jugadas por columnas
+ *
+ * @param matriz
+ *		Matriz con los valores actuales de los diamantes.
+ *
+ * @param dimens
+ *		Estructura con las dimensiones de la matriz.
+ *
+ * @param mat2
+ *		Matriz en la que se va a indicar los valores de las mejores 
+ *		jugadas por posicion
+ *
+ * @param solv
+ *		Matriz que devuleve las mejores jugdas(posicion, movimiento 
+ *		y valor de cada jugada).
+ */
+__global__ void realizar_jugada_cuda_vertical (int * mat, Dim dimens,int * mat2, int * solv);
+
+/**
+ * Busca las mejores jugadas por columnas
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		ERR_CUDA si hubo alg˙n error al obtener las caracterÌsticas del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
+ */
+int realizar_jugada_vertical(Malla * malla, int * jugada);
+
+/**
+ * Busca la mejor jugada entre las horizontales y las verticales, y 
+ * ejecuta la mejor jugada
+ *
+ * @return
+ *		SUCCESS si todo ha salido correctamente.
+ *		ERR_CUDA si hubo alg˙n error al obtener las caracterÌsticas del
+ *	dispositivo.
+ *		ERR_TAM si la matriz especificada sobrepasa las capacidades del
+ *	dispositivo.
+ */
+int realizar_jugada(Malla *malla);
+
 #endif
