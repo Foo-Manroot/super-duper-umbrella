@@ -385,7 +385,7 @@ int realizar_jugada_vertical(Malla * malla)
 	/* */
 	CUDA (err, cudaMemcpy(aux,mov_d, tam * sizeof aux [0], cudaMemcpyDeviceToHost));
 	
-	CUDA (err, cudaMemcpy(&vec, vec_d,sizeof (int) * malla->dimens.columnas, cudaMemcpyDeviceToHost ));
+	CUDA (err, cudaMemcpy(vec, vec_d,sizeof (int) * malla->dimens.columnas, cudaMemcpyDeviceToHost ));
 	
 
 
