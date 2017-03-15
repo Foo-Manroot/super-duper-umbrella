@@ -1,0 +1,6 @@
+//realizar_jugada
+
+__global__ void realizar_jugada_cuda_horizontal (int * mat, Dim dimens,int * mat2/*, int * solh*/);
+int realizar_jugada_horizontal(Malla *malla);
+__global__ void realizar_jugada_cuda_vartical (int * mat, Dim dimens,int * mat2, int * solv);
+int realizar_jugada_vertical(Malla *malla);

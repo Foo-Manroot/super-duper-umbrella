@@ -1,0 +1,407 @@
+__global__ void realizar_jugada_horizontal_cuda (int * mat1, Dim dimens, int * mat2/*,int * solh*/)
+{
+
+	int fila = threadIdx.x, aux = fila * dimens.columnas;
+
+
+	//Variable para recorrer la matriz
+	int fin = 0;
+	int cont = 0;
+	int mov = 1;
+	int ref = 0;
+
+	//Vareables no definitivas para guardar el movimiento que se va a realizar
+	/*
+	int sen = 0;
+	int posY = 0;
+	int posX = 0;
+	*/
+	//Mejor movimiento horizontal
+	/*
+	int mh_valor = 0;
+	int mh_sen = 0;  //Sentido del movimeinto
+	int mh_posY = 0;
+	int mh_posX = 0;
+	*/
+
+	for (int i = 0; i < dimens.columnas; i++)
+	{
+		ref = mat1[aux + i];
+
+		for(int j = i; j < dimens.columnas; j ++)
+		{
+			if(fin == 0)
+			{
+				if(ref == mat1[aux + j])
+				{
+					//Mira si la posicion en la que esta es igual a la referencia
+					cont ++;
+				}
+				else if((mov == 1)&&(fila > 0)&&(ref == mat1[aux - dimens.columnas + j]))
+				{
+					//Mira la posicion de arriba --> mover mat1[aux + j] arriba
+					mov = 0;
+					cont ++;
+
+					//sen = 3; posY = fila; posX = j;
+				}
+				else if((mov == 1)&&(fila < dimens.filas - 1)&&(ref == mat1[aux + dimens.columnas + j]))
+				{
+					//Mira la posicion de abajo --> mover mat1[aux + j] abajo
+					mov = 0;
+					cont ++;
+
+					//sen = 1; posY = fila;posX = j;
+				}
+				else if((mov == 1)&&((j + 1) < dimens.columnas)&&(ref == mat1[aux + j + 1]))
+				{
+					//Mirar la posicion de la derecha --> mover mat1[aux + j] derecha
+					mov = 0;
+					cont ++;
+
+					//sen = 0; posY = fila; posX = j;
+
+					j++; //Pasa a comprobar la siguiente
+
+				}
+				else
+				{
+					fin = 1;
+				}
+			}
+		}	
+		//Mirar en las posiciones de la izquierda
+		if ((mov == 1)&&(i > 0)&&(ref == mat1 [aux - dimens.columnas + i - 1]))
+		{
+			//Mirar la posicion por el lado de la izquierda arriba --> mover mat[aux + i - 1] arriba
+			mov = 0;
+			cont ++;
+
+			//sen = 3; posY = fila; posX = i - 1;
+		}
+		else if ((mov == 1)&&(i > 0)&&(ref == mat1 [aux + dimens.columnas + i -1]))
+		{
+			//Mirar la posicion por el lado de la izquierda abajo --> mover mat[aux + i - 1] abajo
+			mov = 0;
+			cont ++;
+
+			//sen = 1; posY = fila; posX = i - 1;
+		}
+		
+		//if(cont >= data[fila*3]) data[fila*3]=cont;
+			/*
+			mh_sen = sen;
+			mh_posY = posY;
+			mh_posX = posX;
+			mh_valor = cont;
+			*/
+		
+		mat2[aux + i] = cont;
+		
+		//Reiniciamos valores
+		mov = 1;
+		fin = 0;
+		cont = 0;
+	}
+	
+
+	//data[0] = mh_valor;
+	//data[0]= mh_sen;
+	//data[1]= mh_posY;
+	//data[2]= mh_posX;
+
+}
+
+
+int realizar_jugada_horizontal(Malla * malla)
+{
+	
+	cudaError_t err;
+	dim3 bloques, hilos;
+
+	int tam = malla->dimens.columnas * malla->dimens.filas;
+	
+	int * matriz_d;
+	int * mov_d;
+
+	int * aux = (int *) malloc  (tam * sizeof aux [0]);
+
+
+	//Crea un hilo por columna
+	Dim dim_matr_hilos;
+
+	dim_matr_hilos.filas = malla->dimens.filas;
+	dim_matr_hilos.columnas = 1;
+
+	//Inicializa la matriz auxiliar 
+	int idx;
+
+	for (int i = 0; i < malla->dimens.filas; i++)
+	{
+		for (int j = 0; j < malla->dimens.columnas; j++)
+		{
+			idx = (i * malla->dimens.columnas) + j;
+			aux[idx] = malla->matriz[idx].id;
+		}
+	}
+	
+
+	CUDA (err, cudaMalloc((void **)&matriz_d,tam * sizeof matriz_d[0]));
+
+	CUDA (err, cudaMalloc((void **)&mov_d,tam * sizeof mov_d[0]));
+
+	CUDA (err, cudaMemset(mov_d, NO_COINCIDE, tam * sizeof mov_d[0]));
+
+	CUDA (err, cudaMemcpy(matriz_d, aux, tam * sizeof matriz_d [0],cudaMemcpyHostToDevice));
+
+
+	/* Llama al nucelo para comprar la matriz */
+	obtener_dim (&bloques, &hilos, dim_matr_hilos);
+
+	KERNEL (err, realizar_jugada_horizontal_cuda, bloques,hilos,matriz_d,malla->dimens,mov_d);
+
+	CUDA (err, cudaMemcpy(aux,mov_d, tam * sizeof aux [0], cudaMemcpyDeviceToHost));
+	
+
+
+
+	printf("\n");
+	for (int i = 0; i < malla->dimens.filas; i++)
+	{
+		for (int j = 0; j < malla->dimens.columnas; j++)
+		{
+			idx = (i * malla->dimens.columnas) + j;
+			printf("%d  ",aux[idx]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+	
+
+	//copiar_matriz (aux, malla);
+
+	CUDA (err, cudaFree(matriz_d));
+
+	CUDA (err, cudaFree(mov_d));
+
+	return SUCCESS;
+}
+
+__global__ void realizar_jugada_vertical_cuda (int * mat1, Dim dimens, int * mat2, int * solv)
+{
+
+	int columna = threadIdx.y;
+
+
+	//Variable para recorrer la matriz
+	int fin = 0;
+	int cont = 0;
+	int mov = 1;
+	int ref = 0;
+
+	//Vareables no definitivas para guardar el movimiento que se va a realizar
+	/*
+	int sen = 0;
+	int posY = 0;
+	int posX = 0;
+	*/
+	//Mejor movimiento horizontal
+	/*
+	int mh_valor = 0;
+	int mh_sen = 0;  //Sentido del movimeinto
+	int mh_posY = 0;
+	int mh_posX = 0;
+	*/
+
+	for (int i = 0; i < dimens.filas; i++)
+	{
+		ref = mat1[dimens.columnas * i + columna];
+
+		for(int j = i; j < dimens.filas; j ++)
+		{
+			if(fin == 0)
+			{
+				if(ref == mat1[dimens.columnas * j + columna])
+				{
+					//Mira si la posicion en la que esta es igual a la referencia
+					cont ++;
+				}
+				
+				else if((mov == 1)&&(columna > 0)&&(ref == mat1[dimens.columnas * j + columna - 1]))
+				{
+					//Mira la posicion de la izquierda --> mover mat1[dimens.columnas * j + columna - 1] izquierda
+					mov = 0;
+					cont ++;
+
+					//sen = 3; posY = fila; posX = j;
+				}
+				else if((mov == 1)&&(columna < dimens.columnas - 1)&&(ref == mat1[dimens.columnas * j + columna + 1]))
+				{
+					//Mira la posicion de la derecha --> mover mat1[dimens.columnas * j + columna + 1] derecha
+					mov = 0;
+					cont ++;
+
+					//sen = 1; posY = fila;posX = j;
+				}
+				
+				else if((mov == 1)&&((j + 1) < dimens.filas)&&(ref == mat1[dimens.columnas * (j+1) + columna]))
+				{
+					//Mirar la posicion de abajo --> mover mat1[dimens.columnas * j + columna] abajo
+					mov = 0;
+					cont ++;
+
+					//sen = 0; posY = fila; posX = j;
+
+					j++; //Pasa a comprobar la siguiente
+
+				}
+				else
+				{
+					fin = 1;
+				}
+			}
+		}
+		//Mirar en las posiciones de arriba
+		if ((mov == 1)&&(columna > 0)&&(i>0)&&(ref == mat1 [dimens.columnas * (i- 1) + (columna - 1)]))
+		{
+			//Mirar la posicion por el lado de arriba izquierda --> mover mat[dimens.columnas * (i- 1) + (columna - 1)] izquierda
+			mov = 0;
+			cont ++;
+
+			//sen = 3; posY = fila; posX = i - 1;
+		}
+		else if ((mov == 1)&&(i > 0)&&(columna + 1 < dimens.columnas)&&(ref == mat1 [dimens.columnas * (i - 1) + (columna + 1)]))
+		{
+			//Mirar la posicion por el lado de la arriba derecha --> mover mat[dimens.columnas * (i - 1) + (columna + 1)] derecha
+			mov = 0;
+			cont ++;
+
+			//sen = 1; posY = fila; posX = i - 1;
+		}
+
+		//if(cont >= data[fila*3]) data[fila*3]=cont;
+			/*
+			mh_sen = sen;
+			mh_posY = posY;
+			mh_posX = posX;
+			mh_valor = cont;
+			*/
+		
+		mat2[dimens.columnas * i + columna] = cont;
+		
+		//Reiniciamos valores
+		mov = 1;
+		fin = 0;
+		cont = 0;
+	}
+	
+	
+
+	//data[0] = mh_valor;
+	//data[0]= mh_sen;
+	//data[1]= mh_posY;
+	//data[2]= mh_posX;
+
+}
+
+int realizar_jugada_vertical(Malla * malla)
+{
+	printf("\nVertical\n");
+
+	cudaError_t err;
+	dim3 bloques, hilos;
+
+	int tam = malla->dimens.columnas * malla->dimens.filas;
+	
+	int * matriz_d;
+	int * mov_d;
+
+	int * aux = (int *) malloc  (tam * sizeof aux [0]);
+
+
+	//vector solv ********
+	int * vec = (int *) malloc (malla->dimens.columnas * sizeof (int));
+	int * vec_d;
+
+	cudaMalloc((void **) &vec_d,malla->dimens.columnas * sizeof (int));
+
+	for (int i = 0; i < malla->dimens.columnas; i++)
+	{
+		vec[i] = 0;
+	}
+	//*******
+
+	//Crea un hilo por fila
+	Dim dim_matr_hilos;
+
+	dim_matr_hilos.filas = 1;
+	dim_matr_hilos.columnas = malla->dimens.columnas;
+
+	
+
+	//Inicializa la matriz auxiliar 
+	int idx;
+
+	for (int i = 0; i < malla->dimens.filas; i++)
+	{
+
+		for (int j = 0; j < malla->dimens.columnas; j++)
+		{
+			idx = (i * malla->dimens.columnas) + j;
+			aux[idx] = malla->matriz[idx].id;
+		}
+	}
+	
+
+	CUDA (err, cudaMalloc((void **)&matriz_d,tam * sizeof matriz_d[0]));
+
+	CUDA (err, cudaMalloc((void **)&mov_d,tam * sizeof mov_d[0]));
+
+	CUDA (err, cudaMemset(mov_d, NO_COINCIDE, tam * sizeof mov_d[0]));
+
+	CUDA (err, cudaMemcpy(matriz_d, aux, tam * sizeof matriz_d [0],cudaMemcpyHostToDevice));
+
+	
+	// **************************
+	cudaMemcpy( vec_d, &vec,sizeof (int) * malla->dimens.columnas, cudaMemcpyHostToDevice );
+
+	/* Llama al nucelo para comprar la matriz */
+	obtener_dim (&bloques, &hilos, dim_matr_hilos);
+
+	KERNEL (err, realizar_jugada_vertical_cuda, bloques,hilos,matriz_d,malla->dimens,mov_d,vec_d);
+
+	
+	/* */
+	CUDA (err, cudaMemcpy(aux,mov_d, tam * sizeof aux [0], cudaMemcpyDeviceToHost));
+	
+	CUDA (err, cudaMemcpy(&vec, vec_d,sizeof (int) * malla->dimens.columnas, cudaMemcpyDeviceToHost ));
+	
+
+
+
+	printf("\n");
+	for (int i = 0; i < malla->dimens.filas; i++)
+	{
+		for (int j = 0; j < malla->dimens.columnas; j++)
+		{
+			idx = (i * malla->dimens.columnas) + j;
+			printf("%d  ",aux[idx]);
+		}
+		printf("\n");
+	}
+
+	printf("\n");
+	for (int i = 0; i < malla->dimens.columnas; i++)
+	{
+		printf("%d ",vec[i]);
+	}
+	printf("\n");
+
+	//copiar_matriz (aux, malla);
+
+	CUDA (err, cudaFree(matriz_d));
+
+	CUDA (err, cudaFree(mov_d));
+
+	return SUCCESS;
+}
