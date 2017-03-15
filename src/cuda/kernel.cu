@@ -1183,7 +1183,6 @@ __global__ void realizar_jugada_horizontal_cuda (int * mat1, Dim dimens, int * m
 	
 	//Mejor movimiento horizontal
 	
-	int mh_valor = 0;
 	int mh_sen = 0;  //Sentido del movimeinto
 	int mh_posY = 0;
 	int mh_posX = 0;
@@ -1418,7 +1417,6 @@ __global__ void realizar_jugada_vertical_cuda (int * mat1, Dim dimens, int * mat
 	
 	//Mejor movimiento horizontal
 	
-	int mh_valor = 0;
 	int mh_sen = 0;  //Sentido del movimeinto
 	int mh_posY = 0;
 	int mh_posX = 0;
