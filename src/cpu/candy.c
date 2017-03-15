@@ -21,68 +21,6 @@ int main (int argc, char *argv[])
 	menu (malla);
 
 	return SUCCESS;
-/*
-	for (int i = 0; i < 10; ++i)
-	{
-		mostrar_malla(malla);
-		
-		int posY,posX,mov;		
-		printf("PosY: ");
-        scanf("%d", &(posY));
-        printf("PosX: ");
-        scanf("%d", &(posX));
-        printf("Mov{abajo = 1, arriba = 3, izquierda = 2, derecha = 0}: ");
-        scanf("%d", &(mov));
-*/
-
-        /*
-        int bomba;
-        printf("Bomba: ");
-        scanf("%d", &(bomba));
-
-        int fila = 0;
-        int columna = 0;
-
-        switch(bomba){
-        	case 1:
-        		
-        		printf("Fila: ");
-        		scanf("%d", &(fila));
-        		eliminar_fila(fila,malla);
-        		break;
-        	case 2: 
-        		
-        		printf("Columna: ");
-        		scanf("%d", &(columna));
-        		eliminar_columna(columna,malla);
-        		break;
-        	case 3: 
-        		recorrer_malla_giro(malla);
-        		break;
-
-        }
-		*/
-/*        system("clear");
-
-        //Refresh
-		mover_diamante(posY,posX,mov,malla);
-		recorrer_malla_coincidencias(malla);
-
-		//
-		system("clear");
-		mostrar_malla(malla);
-
-		scanf("%d", &(mov));
-
-		//
-		system("clear");
-		recorrer_malla_huecos(malla);
-
-
-	}
-
-	return 0;
-*/
 }
 
 /* ---------------- */
@@ -613,8 +551,6 @@ int buscar_jugada_horizontal(int posY, int posX, Malla malla,int * posYC,int * p
 
 	int numMov = 1; //Numero de movimientos posibles
 
-	int seguir  = 1;
-
 for (int i = posX; i < ver_params ().dimens.columnas; ++i)
 	{
 	int caso = 0;
@@ -654,8 +590,6 @@ for (int i = posX; i < ver_params ().dimens.columnas; ++i)
 
 	switch(caso){
 		case 0:
-
-			seguir = 0;
 			break;
 		case 1:
 			//printf("    [%d][%d] == [%d][%d]\n",posY , posX,(posY ),i);
@@ -708,8 +642,6 @@ for (int i = posX; i < ver_params ().dimens.columnas; ++i)
 			i ++;
 			break;
 		case 7:
-
-			seguir  = 0;
 			break;
 	}
 	
@@ -725,8 +657,6 @@ int buscar_jugada_vertical(int posY, int posX, Malla malla,int * posYC,int * pos
 	referencia = malla.matriz[((posY *  malla.dimens.columnas) + posX)];
 
 	int numMov = 1; //Numero de movimientos posibles
-
-	int seguir  = 1;
 
 for (int i = posX; i < ver_params ().dimens.filas; ++i)
 	{
@@ -767,8 +697,6 @@ for (int i = posX; i < ver_params ().dimens.filas; ++i)
 
 	switch(caso){
 		case 0:
-
-			seguir = 0;
 			break;
 		case 1:
 			//printf("    [%d][%d] == [%d][%d]\n",posY , posX,(posY ),i);
@@ -821,8 +749,6 @@ for (int i = posX; i < ver_params ().dimens.filas; ++i)
 			i ++;
 			break;
 		case 7:
-
-			seguir  = 0;
 			break;
 	}
 	
