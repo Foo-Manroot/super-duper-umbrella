@@ -605,4 +605,302 @@ void recorrer_malla_giro (Malla malla)
 	}
 
 }
+int buscar_jugada_horizontal(int posY, int posX, Malla malla,int * posYC,int * posXC, int * movC)
+{
+	int mjh = 0;
+	Diamante referencia;
+	referencia = malla.matriz[((posY *  malla.dimens.columnas) + posX)];
 
+	int numMov = 1; //Numero de movimientos posibles
+
+	int seguir  = 1;
+
+for (int i = posX; i < ver_params ().dimens.columnas; ++i)
+	{
+	int caso = 0;
+
+	if(((i+ 2) < ver_params ().dimens.columnas)&&(numMov > 0)
+		&&(son_iguales(referencia,malla.matriz[((posY) *  malla.dimens.columnas) + i + 1]) == 1)) 
+		caso = 6;
+
+	if((posY + 1 < ver_params ().dimens.filas)
+		&&(numMov > 0)
+		&&((i - posX) == 1)
+		&&(son_iguales(malla.matriz[((posY + 1 )*  malla.dimens.columnas) + posX],malla.matriz[(posY *  malla.dimens.columnas) + i]) == 1)) 
+		caso = 3;
+
+	if((posY > 0)
+		&&(numMov > 0)
+		&&((i - posX) == 1)
+		&&(son_iguales(malla.matriz[((posY - 1) *  malla.dimens.columnas) + posX],malla.matriz[(posY *  malla.dimens.columnas) + i]) == 1)) 
+		caso = 2;
+
+	if(((posY + 1)< ver_params ().dimens.filas)
+		&&(son_iguales(referencia,malla.matriz[((posY + 1) *  malla.dimens.columnas) + i]) == 1)
+		&&(numMov > 0)) 
+		caso = 5;
+
+	if((posY > 0)&&
+		(son_iguales(referencia,malla.matriz[((posY - 1) *  malla.dimens.columnas) + i]) == 1)
+		&&(numMov > 0)) 
+		caso = 4;
+
+	if((numMov == 0)&&(son_iguales(malla.matriz[(posY *  malla.dimens.columnas) + i - 1],malla.matriz[(posY *  malla.dimens.columnas) + i]) == 0))
+		caso = 7;
+	
+	
+	if(son_iguales(referencia,malla.matriz[(posY *  malla.dimens.columnas) + i]) == 1) 
+		caso = 1;
+
+	switch(caso){
+		case 0:
+
+			seguir = 0;
+			break;
+		case 1:
+			//printf("    [%d][%d] == [%d][%d]\n",posY , posX,(posY ),i);
+			mjh ++;
+			break;
+		case 2:
+
+			//printf("1MD.- %d,%d == %d,%d (%d)\n",posY-1,posX,posY,i,malla.matriz[((posY - 1 )*  malla.dimens.columnas) + posX].id);
+			//printf("1.Move down  [%d][%d] -- [%d][%d]\n",posY - 1, posX,posY,posX);
+			//printf("Cambia referencia a [%d][%d] (%d)\n",posY-1,posX,malla.matriz[((posY - 1) *  malla.dimens.columnas) + posX].id);
+			referencia = malla.matriz[((posY - 1) *  malla.dimens.columnas) + posX];
+			*movC  = 1;*posYC = posY - 1; *posXC = posX;
+			
+			mjh ++;
+			numMov -- ;
+			break;
+		case 3:
+
+			//printf("1MU.- %d,%d == %d,%d (%d)\n",posY+1,posX,posY,i,malla.matriz[((posY + 1 )*  malla.dimens.columnas) + posX].id);
+			//printf("1.Move up  [%d][%d] -- [%d][%d]\n",posY + 1 , posX,posY,posX);
+			//printf("Cambia referencia a [%d][%d] (%d)\n",posY+1,posX,malla.matriz[((posY + 1) *  malla.dimens.columnas) + posX].id);
+			referencia = malla.matriz[((posY + 1) *  malla.dimens.columnas) + posX];
+			*movC = 3; *posYC = posY + 1; *posXC = posX;
+		
+			mjh ++;
+			numMov --;
+			break;
+		case 4:
+
+			//printf("2.Move down  [%d][%d] -- [%d][%d] (%d)\n",posY - 1, i,posY,i,referencia.id);
+
+			*movC = 1; *posYC = posY - 1; *posXC = i;
+			numMov --;
+			mjh ++;
+			break;
+		case 5:
+
+			//printf("2.Move up [%d][%d] -- [%d][%d] (%d)\n",posY + 1, i, posY,i,referencia.id);
+
+			*movC = 3; *posYC = posY + 1; *posXC = i;
+			numMov --;
+			mjh ++;
+			break;
+		case 6:
+
+			//printf("3.Move forward [%d][%d] -- [%d][%d]\n",posY , posX ,posY ,i + 1);
+			*movC = 2;*posYC = posY; *posXC = posX;
+			numMov --;
+			mjh++;
+			i ++;
+			break;
+		case 7:
+
+			seguir  = 0;
+			break;
+	}
+	
+}
+
+	return mjh;
+}
+
+int buscar_jugada_vertical(int posY, int posX, Malla malla,int * posYC,int * posXC, int * movC)
+{
+	int mjv = 0;
+	Diamante referencia;
+	referencia = malla.matriz[((posY *  malla.dimens.columnas) + posX)];
+
+	int numMov = 1; //Numero de movimientos posibles
+
+	int seguir  = 1;
+
+for (int i = posX; i < ver_params ().dimens.filas; ++i)
+	{
+	int caso = 0;
+
+	if(((i + 2) < ver_params ().dimens.filas)&&(numMov > 0)
+		&&(son_iguales(referencia,malla.matriz[((posY + i + 1) *  malla.dimens.columnas)]) == 1)) 
+		caso = 6;
+
+	if((posX + 1 < ver_params ().dimens.columnas)
+		&&(numMov > 0)
+		&&((i - posY) == 1)
+		&&(son_iguales(malla.matriz[((posY)*  malla.dimens.columnas) + posX + 1],malla.matriz[((posY +i)*  malla.dimens.columnas)]) == 1)) 
+		caso = 3;
+
+	if((posX > 0)
+		&&(numMov > 0)
+		&&((i - posY) == 1)
+		&&(son_iguales(malla.matriz[((posY) *  malla.dimens.columnas) + posX - 1],malla.matriz[((posY + 1)*  malla.dimens.columnas)]) == 1)) 
+		caso = 2;
+
+	if(((posX + 1)< ver_params ().dimens.columnas)
+		&&(son_iguales(referencia,malla.matriz[((posY+ i) *  malla.dimens.columnas)  + 1]) == 1)
+		&&(numMov > 0)) 
+		caso = 5;
+
+	if((posX > 0)
+		&&(son_iguales(referencia,malla.matriz[((posY+ i) *  malla.dimens.columnas)  - 1]) == 1)
+		&&(numMov > 0)) 
+		caso = 4;
+
+	if((numMov == 0)&&(son_iguales(malla.matriz[((posY + i - 1)*  malla.dimens.columnas) ],malla.matriz[((posY + i)*  malla.dimens.columnas) ]) == 0))
+		caso = 7;
+	
+	
+	if(son_iguales(referencia,malla.matriz[((posY+ i) *  malla.dimens.columnas) ]) == 1) 
+		caso = 1;
+
+	switch(caso){
+		case 0:
+
+			seguir = 0;
+			break;
+		case 1:
+			//printf("    [%d][%d] == [%d][%d]\n",posY , posX,(posY ),i);
+			mjv ++;
+			break;
+		case 2:
+
+			//printf("1MD.- %d,%d == %d,%d (%d)\n",posY-1,posX,posY,i,malla.matriz[((posY - 1 )*  malla.dimens.columnas) + posX].id);
+			//printf("1.Move down  [%d][%d] -- [%d][%d]\n",posY - 1, posX,posY,posX);
+			//printf("Cambia referencia a [%d][%d] (%d)\n",posY-1,posX,malla.matriz[((posY - 1) *  malla.dimens.columnas) + posX].id);
+			referencia = malla.matriz[((posY ) *  malla.dimens.columnas) + posX- 1];
+			*movC  = 0;*posYC = posY ; *posXC = posX- 1;
+			
+			mjv ++;
+			numMov -- ;
+			break;
+		case 3:
+
+			//printf("1MU.- %d,%d == %d,%d (%d)\n",posY+1,posX,posY,i,malla.matriz[((posY + 1 )*  malla.dimens.columnas) + posX].id);
+			//printf("1.Move up  [%d][%d] -- [%d][%d]\n",posY + 1 , posX,posY,posX);
+			//printf("Cambia referencia a [%d][%d] (%d)\n",posY+1,posX,malla.matriz[((posY + 1) *  malla.dimens.columnas) + posX].id);
+			referencia = malla.matriz[((posY) *  malla.dimens.columnas) + posX + 1];
+			*movC = 2; *posYC = posY; *posXC = posX + 1;
+		
+			mjv ++;
+			numMov --;
+			break;
+		case 4:
+
+			//printf("2.Move down  [%d][%d] -- [%d][%d] (%d)\n",posY - 1, i,posY,i,referencia.id);
+
+			*movC = 0; *posYC = i ; *posXC = posX - 1;
+			numMov --;
+			mjv ++;
+			break;
+		case 5:
+
+			//printf("2.Move up [%d][%d] -- [%d][%d] (%d)\n",posY + 1, i, posY,i,referencia.id);
+
+			*movC = 2; *posYC = i; *posXC =posX + 1 ;
+			numMov --;
+			mjv ++;
+			break;
+		case 6:
+
+			//printf("3.Move forward [%d][%d] -- [%d][%d]\n",posY , posX ,posY ,i + 1);
+			*movC = 3;*posYC = posY; *posXC = posX;
+			numMov --;
+			mjv++;
+			i ++;
+			break;
+		case 7:
+
+			seguir  = 0;
+			break;
+	}
+	
+}
+
+	return mjv;
+}
+
+int buscar_jugada(int posY, int posX, Malla malla,int * posYC, int * posXC, int * movC)
+{
+	//mj mide cual seria la mejor jugada contando los diamantes que se eliminarian
+	int mj = 0;
+
+	int mPosYC, mPosXC, mMovC;
+	int vPosYC, vPosXC, vMovC;
+
+	int mjh = buscar_jugada_horizontal(posY,posX,malla,&mPosYC,&mPosXC,&mMovC);
+	int mjv = buscar_jugada_vertical(posY,posX,malla,&vPosYC,&vPosXC,&vMovC);
+
+	//Coge la mejor entre horizontal y vertical	
+	if((mjh > mj)||(mjv>mj))
+	{
+		if(mjh>= mjv)
+		{
+			mj = mjh;
+			*posYC = mPosYC;
+			*posXC = mPosXC;
+			*movC = mMovC;
+
+		}
+		else
+		{
+			mj = mjv;
+			*posYC = vPosYC;
+			*posXC = vPosXC;
+			*movC = vMovC;
+		}
+
+	}
+
+	return mj;
+}
+
+/*Revsiar en un futuro, funcionamiento no completo*/
+void recorrer_malla_jugadas(Malla malla)
+{
+	int mejorJugada = 0;
+	int mj;
+
+	int posYC,posXC,movC;
+	int mPosYC,mPosXC,mMovC;
+
+
+	//printf("Se busca la mejor jugada\n");
+
+	for (int i = 0; i < ver_params ().dimens.filas; ++i)
+	{
+		for (int j = 0; j < ver_params ().dimens.columnas; ++j)
+		{
+			mj = buscar_jugada(i,j,malla,&posYC,&posXC,&movC);
+			if((mj > mejorJugada)&&(mj>2)){
+
+				mPosYC = posYC; mPosXC = posXC; mMovC = movC;
+				mejorJugada = mj;
+			}		
+			
+		}
+	}
+	if(mj > 0)
+	{
+		//printf("Jugada para -->[%d][%d] = %d\n",i,j,mejorJugada);
+		if(mejorJugada > 0){
+			printf("Pos[%d][%d] .- MOV: %d | MJ: %d\nRealizar movimiento...\n",mPosYC,mPosXC,mMovC,mejorJugada);
+			mover_diamante (mPosYC, mPosXC, mMovC, malla);
+		}else{
+			printf("No hay jugadas posibles\n");
+		}
+		
+	}
+
+}
