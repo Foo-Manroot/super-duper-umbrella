@@ -1,8 +1,14 @@
 __global__ void realizar_jugada_horizontal_cuda (int * mat1, Dim dimens, int * mat2/*,int * solh*/)
 {
 
-	int fila = threadIdx.x, aux = fila * dimens.columnas;
+	int aux = fila * dimens.columnas;
+	    fila = blockIdx.x * blockDim.x + threadIdx.x;
 
+	if ((fila >= dimens.filas)
+		|| ( (blockIdx.y * blockDim.y + threadIdx.y) != 0) )
+	{
+		return;
+	}
 
 	//Variable para recorrer la matriz
 	int fin = 0;
@@ -189,8 +195,13 @@ int realizar_jugada_horizontal(Malla * malla)
 
 __global__ void realizar_jugada_vertical_cuda (int * mat1, Dim dimens, int * mat2, int * solv)
 {
+	int columna = blockIdx.y * blockDim.y + threadIdx.y;
 
-	int columna = threadIdx.y;
+	if ((columna >= dimens.columnas)
+		|| ( (blockIdx.x * blockDim.x + threadIdx.x) != 0) )
+	{
+		return;
+	}
 
 
 	//Variable para recorrer la matriz
