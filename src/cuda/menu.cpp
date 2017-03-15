@@ -52,7 +52,7 @@ void menu (Malla malla)
 				cambiar_nivel (&malla);
 				break;
 			case 6:
-				imprimir (DETALLE_LOG, "Opción aún no implementada.\n");
+				realizar_jugada (&malla);
 				break;
 			default:
 				imprimir (DETALLE_LOG, "Opción no reconocida.\n");
